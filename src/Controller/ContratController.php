@@ -107,7 +107,7 @@ class ContratController extends AbstractController
     public function delete(Request $request, Contrat $contrat, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete' . $contrat->getId(), $request->request->get('_token'))) {
-            $em->remove($contrat);
+            $contrat->setSupprimeLe(new \DateTimeImmutable());
             $em->flush();
             $this->addFlash('success', 'Document supprimé.');
         }

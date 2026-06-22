@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Enum\StatutContrat;
 use App\Enum\TypeContrat;
 use App\Repository\ContratRepository;
+use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,8 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Convertible en facture (Phase 3).
  */
 #[ORM\Entity(repositoryClass: ContratRepository::class)]
-class Contrat
+class Contrat implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

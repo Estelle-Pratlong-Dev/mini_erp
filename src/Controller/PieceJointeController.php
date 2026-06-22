@@ -108,12 +108,8 @@ class PieceJointeController extends AbstractController
         $cible = $piece->getContrat() ? 'contrat' : 'projet';
         $cibleId = $piece->getContrat()?->getId() ?? $piece->getProjet()?->getId() ?? 0;
 
-        $chemin = $this->uploadDir() . '/' . $piece->getFichier();
-        if (is_file($chemin)) {
-            @unlink($chemin);
-        }
-
-        $em->remove($piece);
+        // Suppression logique : on conserve le fichier et la ligne en base.
+        $piece->setSupprimeLe(new \DateTimeImmutable());
         $em->flush();
         $this->addFlash('success', 'Pièce jointe supprimée.');
 

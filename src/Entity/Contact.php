@@ -4,14 +4,17 @@ namespace App\Entity;
 
 use App\Enum\TypeContact;
 use App\Repository\ContactRepository;
+use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
-class Contact
+class Contact implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

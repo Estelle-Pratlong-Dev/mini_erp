@@ -74,7 +74,7 @@ class ProduitController extends AbstractController
     public function delete(Request $request, Produit $produit, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
-            $em->remove($produit);
+            $produit->setSupprimeLe(new \DateTimeImmutable());
             $em->flush();
             $this->addFlash('success', 'Produit supprimé.');
         }

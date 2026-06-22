@@ -52,6 +52,17 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   `#[IsGranted('ROLE_CONTACTS_VOIR')]` dans les contrôleurs et `is_granted(...)` dans Twig.
 - Le rôle `ADMIN` reçoit **toutes** les permissions (re-synchronisées par `app:install`).
 
+### Suppression logique (soft delete)
+- Les entités supprimables implémentent `App\Entity\SoftDeletableInterface` et utilisent
+  `App\Trait\SoftDeleteTrait` (colonne `supprime_le`). Concernées : User, Role, Permission,
+  Contact, Produit, Projet, Contrat, PieceJointe.
+- Le filtre Doctrine `App\Doctrine\SoftDeleteFilter` (activé dans `doctrine.yaml`) exclut
+  **automatiquement** les éléments supprimés de toutes les requêtes (listes, find, associations, count).
+- On ne fait jamais `$em->remove()` sur ces entités : on appelle `setSupprimeLe(new \DateTimeImmutable())`.
+  Côté EasyAdmin, `SoftDeleteCrudTrait::deleteEntity()` fait de même.
+- Conséquence connue : un enregistrement supprimé conserve sa valeur d'unicité (ex. email,
+  référence produit) — à gérer si on veut réutiliser ces valeurs.
+
 ### Audit
 - `App\Trait\TimestampableTrait` (`createdAt/By`, `updatedAt/By`) sur les entités métier.
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`

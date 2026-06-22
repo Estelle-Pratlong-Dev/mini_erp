@@ -21,6 +21,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserCrudController extends AbstractCrudController
 {
+    use SoftDeleteCrudTrait;
+
     public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
     {
     }

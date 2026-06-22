@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class PermissionCrudController extends AbstractCrudController
 {
+    use SoftDeleteCrudTrait;
+
     public static function getEntityFqcn(): string
     {
         return Permission::class;

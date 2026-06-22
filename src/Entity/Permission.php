@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PermissionRepository;
+use App\Trait\SoftDeleteTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,8 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: PermissionRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_PERMISSION_CODE', fields: ['code'])]
 #[UniqueEntity(fields: ['code'], message: 'Ce code de permission existe déjà.')]
-class Permission
+class Permission implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

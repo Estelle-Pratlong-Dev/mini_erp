@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PieceJointeRepository;
+use App\Trait\SoftDeleteTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,8 +11,10 @@ use Doctrine\ORM\Mapping as ORM;
  * (et une facture en Phase 3). Le fichier est stocké hors web et servi via un contrôleur sécurisé.
  */
 #[ORM\Entity(repositoryClass: PieceJointeRepository::class)]
-class PieceJointe
+class PieceJointe implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

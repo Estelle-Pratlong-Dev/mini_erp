@@ -75,7 +75,7 @@ class ProjetController extends AbstractController
     public function delete(Request $request, Projet $projet, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete' . $projet->getId(), $request->request->get('_token'))) {
-            $em->remove($projet);
+            $projet->setSupprimeLe(new \DateTimeImmutable());
             $em->flush();
             $this->addFlash('success', 'Projet supprimé.');
         }

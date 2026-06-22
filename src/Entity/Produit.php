@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\TypeProduit;
 use App\Repository\ProduitRepository;
+use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,8 +13,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_PRODUIT_REFERENCE', fields: ['reference'])]
 #[UniqueEntity(fields: ['reference'], message: 'Cette référence existe déjà.')]
-class Produit
+class Produit implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\StatutProjet;
 use App\Repository\ProjetRepository;
+use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,8 +16,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Le nom est libre (nom du client, nom du marché, ou date du jour pour les ventes du jour).
  */
 #[ORM\Entity(repositoryClass: ProjetRepository::class)]
-class Projet
+class Projet implements SoftDeletableInterface
 {
+    use SoftDeleteTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
