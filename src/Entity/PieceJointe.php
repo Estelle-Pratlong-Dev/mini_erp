@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PieceJointeRepository;
 use App\Trait\SoftDeleteTrait;
+use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PieceJointe implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
+    use TimestampableTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,9 +35,6 @@ class PieceJointe implements SoftDeletableInterface
     #[ORM\Column(nullable: true)]
     private ?int $taille = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $dateAjout = null;
-
     #[ORM\ManyToOne(targetEntity: Projet::class, inversedBy: 'piecesJointes')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Projet $projet = null;
@@ -43,11 +42,6 @@ class PieceJointe implements SoftDeletableInterface
     #[ORM\ManyToOne(targetEntity: Contrat::class, inversedBy: 'piecesJointes')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Contrat $contrat = null;
-
-    public function __construct()
-    {
-        $this->dateAjout = new \DateTimeImmutable();
-    }
 
     public function getId(): ?int { return $this->id; }
 
@@ -62,9 +56,6 @@ class PieceJointe implements SoftDeletableInterface
 
     public function getTaille(): ?int { return $this->taille; }
     public function setTaille(?int $taille): static { $this->taille = $taille; return $this; }
-
-    public function getDateAjout(): ?\DateTimeImmutable { return $this->dateAjout; }
-    public function setDateAjout(\DateTimeImmutable $d): static { $this->dateAjout = $d; return $this; }
 
     public function getProjet(): ?Projet { return $this->projet; }
     public function setProjet(?Projet $projet): static { $this->projet = $projet; return $this; }

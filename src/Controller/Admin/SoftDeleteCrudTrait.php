@@ -14,7 +14,7 @@ trait SoftDeleteCrudTrait
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if ($entityInstance instanceof SoftDeletableInterface) {
-            $entityInstance->setSupprimeLe(new \DateTimeImmutable());
+            $entityInstance->setSupprime(true);
             $entityManager->flush();
 
             return;

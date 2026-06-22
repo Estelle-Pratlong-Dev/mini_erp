@@ -109,7 +109,7 @@ class PieceJointeController extends AbstractController
         $cibleId = $piece->getContrat()?->getId() ?? $piece->getProjet()?->getId() ?? 0;
 
         // Suppression logique : on conserve le fichier et la ligne en base.
-        $piece->setSupprimeLe(new \DateTimeImmutable());
+        $piece->setSupprime(true);
         $em->flush();
         $this->addFlash('success', 'Pièce jointe supprimée.');
 

@@ -18,8 +18,8 @@ class SoftDeleteFilter extends SQLFilter
             return '';
         }
 
-        $column = $targetEntity->getColumnName('supprimeLe');
+        $column = $targetEntity->getColumnName('supprime');
 
-        return sprintf('%s.%s IS NULL', $targetTableAlias, $column);
+        return sprintf('%s.%s = 0', $targetTableAlias, $column);
     }
 }

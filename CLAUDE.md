@@ -54,19 +54,23 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 
 ### Suppression logique (soft delete)
 - Les entités supprimables implémentent `App\Entity\SoftDeletableInterface` et utilisent
-  `App\Trait\SoftDeleteTrait` (colonne `supprime_le`). Concernées : User, Role, Permission,
+  `App\Trait\SoftDeleteTrait` (**booléen `supprime`**). Concernées : User, Role, Permission,
   Contact, Produit, Projet, Contrat, PieceJointe.
+- La **date et l'auteur** de la suppression ne sont pas stockés à part : une suppression est une
+  modification, donc `modifieLe` / `modifiePar` (audit) sont mis à jour automatiquement au flush.
 - Le filtre Doctrine `App\Doctrine\SoftDeleteFilter` (activé dans `doctrine.yaml`) exclut
-  **automatiquement** les éléments supprimés de toutes les requêtes (listes, find, associations, count).
-- On ne fait jamais `$em->remove()` sur ces entités : on appelle `setSupprimeLe(new \DateTimeImmutable())`.
+  **automatiquement** les éléments supprimés (`supprime = 1`) de toutes les requêtes
+  (listes, find, associations, count).
+- On ne fait jamais `$em->remove()` sur ces entités : on appelle `setSupprime(true)`.
   Côté EasyAdmin, `SoftDeleteCrudTrait::deleteEntity()` fait de même.
 - Conséquence connue : un enregistrement supprimé conserve sa valeur d'unicité (ex. email,
   référence produit) — à gérer si on veut réutiliser ces valeurs.
 
 ### Audit
 - `App\Trait\TimestampableTrait` : champs **en français** `creeLe` / `creePar` / `modifieLe` /
-  `modifiePar` (colonnes `cree_le`, `cree_par_id`, `modifie_le`, `modifie_par_id`) sur les
-  entités métier (Contact, Produit, Projet, Contrat).
+  `modifiePar` (colonnes `cree_le`, `cree_par_id`, `modifie_le`, `modifie_par_id`).
+- Présent sur **toutes les entités** (Contact, Produit, Projet, Contrat, LigneDocument,
+  PieceJointe, User, Societe, Module, Role, Permission).
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`
   (Doctrine prePersist/preUpdate). Pas besoin de le faire dans les contrôleurs.
 

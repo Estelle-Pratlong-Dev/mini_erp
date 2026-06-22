@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PermissionRepository;
 use App\Trait\SoftDeleteTrait;
+use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,6 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Permission implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
+    use TimestampableTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

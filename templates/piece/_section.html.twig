@@ -23,7 +23,7 @@
                         <span>
                             <i class="bi bi-file-earmark"></i>
                             <a href="{{ path('app_piece_download', {id: piece.id}) }}">{{ piece.nomOriginal }}</a>
-                            <small class="text-muted">— {{ piece.dateAjout|date('d/m/Y H:i') }}{% if piece.taille %} · {{ (piece.taille / 1024)|round }} Ko{% endif %}</small>
+                            <small class="text-muted">— {{ piece.creeLe ? piece.creeLe|date('d/m/Y H:i') : '' }}{% if piece.taille %} · {{ (piece.taille / 1024)|round }} Ko{% endif %}</small>
                         </span>
                         <form method="post" action="{{ path('app_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Supprimer cette pièce jointe ?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete_piece' ~ piece.id) }}">

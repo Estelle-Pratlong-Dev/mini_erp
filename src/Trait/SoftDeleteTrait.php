@@ -5,35 +5,23 @@ namespace App\Trait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Ajoute une colonne `supprime_le` pour la suppression logique (soft delete).
- * Un élément est considéré supprimé si `supprimeLe` n'est pas nul.
+ * Suppression logique (soft delete) via un booléen `supprime`.
+ * La date et l'auteur de la suppression sont portés par les champs d'audit
+ * (modifieLe / modifiePar), une suppression étant considérée comme une modification.
  */
 trait SoftDeleteTrait
 {
-    #[ORM\Column(name: 'supprime_le', type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $supprimeLe = null;
+    #[ORM\Column(options: ['default' => false])]
+    private bool $supprime = false;
 
-    public function getSupprimeLe(): ?\DateTimeImmutable
+    public function isSupprime(): bool
     {
-        return $this->supprimeLe;
+        return $this->supprime;
     }
 
-    public function setSupprimeLe(?\DateTimeImmutable $supprimeLe): static
+    public function setSupprime(bool $supprime): static
     {
-        $this->supprimeLe = $supprimeLe;
-
-        return $this;
-    }
-
-    public function estSupprime(): bool
-    {
-        return $this->supprimeLe !== null;
-    }
-
-    /** Marque l'élément comme supprimé (maintenant). */
-    public function marquerCommeSupprime(): static
-    {
-        $this->supprimeLe = new \DateTimeImmutable();
+        $this->supprime = $supprime;
 
         return $this;
     }
