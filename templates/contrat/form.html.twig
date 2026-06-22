@@ -20,15 +20,14 @@
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead class="table-light">
-                    <tr><th style="width:22%">Produit</th><th>Désignation</th><th style="width:10%">Qté</th><th style="width:12%">PU HT</th><th style="width:10%">TVA %</th><th style="width:5%"></th></tr>
+                    <tr><th style="width:45%">Article (catalogue)</th><th style="width:13%">Qté</th><th style="width:15%">PU HT</th><th style="width:12%">TVA %</th><th style="width:5%"></th></tr>
                 </thead>
                 <tbody id="lignes-body"
                        data-prototype="{{ form_widget(form.lignes.vars.prototype)|e('html_attr') }}"
                        data-index="{{ form.lignes|length }}">
                     {% for ligne in form.lignes %}
                         <tr>
-                            <td>{{ form_widget(ligne.produit) }}</td>
-                            <td>{{ form_widget(ligne.designation) }}</td>
+                            <td>{{ form_widget(ligne.produit) }}{{ form_errors(ligne.produit) }}</td>
                             <td>{{ form_widget(ligne.quantite) }}</td>
                             <td>{{ form_widget(ligne.prixUnitaireHt) }}</td>
                             <td>{{ form_widget(ligne.tauxTva) }}</td>
@@ -61,7 +60,7 @@
         tpl.innerHTML = html.trim();
         const widgets = tpl.content.querySelectorAll('input, select, textarea');
         const tr = document.createElement('tr');
-        const cells = ['produit', 'designation', 'quantite', 'prixUnitaireHt', 'tauxTva'];
+        const cells = ['produit', 'quantite', 'prixUnitaireHt', 'tauxTva'];
         cells.forEach(() => tr.appendChild(document.createElement('td')));
         const tdActions = document.createElement('td');
         tdActions.className = 'text-end';

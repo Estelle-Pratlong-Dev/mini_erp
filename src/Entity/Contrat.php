@@ -48,6 +48,8 @@ class Contrat
 
     /** @var Collection<int, LigneDocument> */
     #[ORM\OneToMany(targetEntity: LigneDocument::class, mappedBy: 'contrat', cascade: ['persist'], orphanRemoval: true)]
+    #[Assert\Valid]
+    #[Assert\Count(min: 1, minMessage: 'Ajoutez au moins une ligne (un article du catalogue).')]
     private Collection $lignes;
 
     /** @var Collection<int, PieceJointe> */

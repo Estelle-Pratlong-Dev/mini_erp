@@ -23,7 +23,8 @@ class LigneDocument
     private ?Contrat $contrat = null;
 
     #[ORM\ManyToOne(targetEntity: Produit::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Chaque ligne doit référencer un article du catalogue.')]
     private ?Produit $produit = null;
 
     #[ORM\Column(length: 255)]
@@ -50,13 +51,15 @@ class LigneDocument
     public function setProduit(?Produit $produit): static
     {
         $this->produit = $produit;
-        // Pré-remplissage pratique depuis le produit
+        // La désignation, le prix et la TVA proviennent de l'article du catalogue.
         if ($produit !== null) {
-            if (!$this->designation) {
-                $this->designation = $produit->getDesignation();
+            $this->designation = $produit->getDesignation();
+            if ($this->prixUnitaireHt === null || (float) $this->prixUnitaireHt === 0.0) {
+                $this->prixUnitaireHt = $produit->getPrixHt();
             }
-            $this->prixUnitaireHt = $produit->getPrixHt();
-            $this->tauxTva = $produit->getTauxTva();
+            if ($this->tauxTva === null) {
+                $this->tauxTva = $produit->getTauxTva();
+            }
         }
         return $this;
     }

@@ -9,6 +9,7 @@ use App\Entity\Projet;
 use App\Enum\CodeModule;
 use App\Form\ContratType;
 use App\Repository\ContratRepository;
+use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,8 +32,22 @@ class ContratController extends AbstractController
 
     #[Route('/nouveau', name: 'app_contrat_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_CONTRATS_CREER')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, ProduitRepository $produitRepository): Response
     {
+        // Un contrat est toujours rattaché à un projet : il en faut au moins un.
+        if ($em->getRepository(Projet::class)->count([]) === 0) {
+            $this->addFlash('warning', 'Créez d\'abord un projet : un devis/contrat doit toujours être rattaché à un projet.');
+
+            return $this->redirectToRoute('app_projet_new');
+        }
+
+        // Un contrat doit contenir des articles du catalogue : il faut au moins un produit actif.
+        if ($produitRepository->count(['actif' => true]) === 0) {
+            $this->addFlash('warning', 'Ajoutez d\'abord au moins un article au catalogue avant de créer un devis/contrat.');
+
+            return $this->redirectToRoute('app_produit_index');
+        }
+
         $contrat = new Contrat();
 
         // Pré-sélection du projet si fourni en query (?projet=ID)
