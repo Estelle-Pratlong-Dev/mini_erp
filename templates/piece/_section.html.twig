@@ -1,0 +1,39 @@
+{# Paramètres attendus : pieces (collection), cible ('projet'|'contrat'), cible_id (int) #}
+<div class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-paperclip"></i> Pièces jointes</span>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{{ path('app_piece_upload') }}" enctype="multipart/form-data" class="row g-2 align-items-end mb-3">
+            <input type="hidden" name="cible" value="{{ cible }}">
+            <input type="hidden" name="cible_id" value="{{ cible_id }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('upload_piece') }}">
+            <div class="col-auto flex-grow-1">
+                <input type="file" name="fichier" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-primary"><i class="bi bi-upload"></i> Joindre</button>
+            </div>
+        </form>
+
+        {% if pieces|length > 0 %}
+            <ul class="list-group">
+                {% for piece in pieces %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-file-earmark"></i>
+                            <a href="{{ path('app_piece_download', {id: piece.id}) }}">{{ piece.nomOriginal }}</a>
+                            <small class="text-muted">— {{ piece.dateAjout|date('d/m/Y H:i') }}{% if piece.taille %} · {{ (piece.taille / 1024)|round }} Ko{% endif %}</small>
+                        </span>
+                        <form method="post" action="{{ path('app_piece_delete', {id: piece.id}) }}" onsubmit="return confirm('Supprimer cette pièce jointe ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_piece' ~ piece.id) }}">
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted mb-0">Aucune pièce jointe.</p>
+        {% endif %}
+    </div>
+</div>

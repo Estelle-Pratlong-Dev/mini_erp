@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Controller;
+
+use App\Attribute\RequireModule;
+use App\Entity\Contrat;
+use App\Entity\Projet;
+use App\Enum\CodeModule;
+use App\Form\ContratType;
+use App\Repository\ContratRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[Route('/contrats')]
+#[RequireModule(CodeModule::CONTRATS)]
+class ContratController extends AbstractController
+{
+    #[Route('', name: 'app_contrat_index', methods: ['GET'])]
+    #[IsGranted('ROLE_CONTRATS_VOIR')]
+    public function index(ContratRepository $repository): Response
+    {
+        return $this->render('contrat/index.html.twig', [
+            'contrats' => $repository->findBy([], ['dateEmission' => 'DESC']),
+        ]);
+    }
+
+    #[Route('/nouveau', name: 'app_contrat_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_CONTRATS_CREER')]
+    public function new(Request $request, EntityManagerInterface $em): Response
+    {
+        $contrat = new Contrat();
+
+        // Pré-sélection du projet si fourni en query (?projet=ID)
+        $projetId = $request->query->getInt('projet');
+        if ($projetId) {
+            $projet = $em->getRepository(Projet::class)->find($projetId);
+            if ($projet) {
+                $contrat->setProjet($projet);
+            }
+        }
+
+        $form = $this->createForm(ContratType::class, $contrat);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($contrat);
+            $em->flush();
+            $this->addFlash('success', 'Document créé.');
+
+            return $this->redirectToRoute('app_contrat_show', ['id' => $contrat->getId()]);
+        }
+
+        return $this->render('contrat/form.html.twig', ['form' => $form, 'titre' => 'Nouveau devis / contrat']);
+    }
+
+    #[Route('/{id}', name: 'app_contrat_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_CONTRATS_VOIR')]
+    public function show(Contrat $contrat): Response
+    {
+        return $this->render('contrat/show.html.twig', ['contrat' => $contrat]);
+    }
+
+    #[Route('/{id}/modifier', name: 'app_contrat_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_CONTRATS_MODIFIER')]
+    public function edit(Request $request, Contrat $contrat, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(ContratType::class, $contrat);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Document modifié.');
+
+            return $this->redirectToRoute('app_contrat_show', ['id' => $contrat->getId()]);
+        }
+
+        return $this->render('contrat/form.html.twig', ['form' => $form, 'titre' => 'Modifier le devis / contrat']);
+    }
+
+    #[Route('/{id}/supprimer', name: 'app_contrat_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_CONTRATS_SUPPRIMER')]
+    public function delete(Request $request, Contrat $contrat, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $contrat->getId(), $request->request->get('_token'))) {
+            $em->remove($contrat);
+            $em->flush();
+            $this->addFlash('success', 'Document supprimé.');
+        }
+
+        return $this->redirectToRoute('app_contrat_index');
+    }
+}

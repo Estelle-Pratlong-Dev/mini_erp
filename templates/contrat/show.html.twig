@@ -1,0 +1,59 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}{{ contrat.type.libelle }} #{{ contrat.id }} — mini ERP{% endblock %}
+{% block page_title %}{{ contrat.type.libelle }} {{ contrat.reference ? '— ' ~ contrat.reference : '#' ~ contrat.id }}{% endblock %}
+{% block page_actions %}
+    {% if is_granted('ROLE_CONTRATS_MODIFIER') %}
+        <a href="{{ path('app_contrat_edit', {id: contrat.id}) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Modifier</a>
+    {% endif %}
+    {% if is_granted('ROLE_CONTRATS_SUPPRIMER') %}
+        <form method="post" action="{{ path('app_contrat_delete', {id: contrat.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce document ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contrat.id) }}">
+            <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Supprimer</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Projet</dt>
+            <dd class="col-sm-9"><a href="{{ path('app_projet_show', {id: contrat.projet.id}) }}">{{ contrat.projet.nom }}</a></dd>
+            <dt class="col-sm-3">Statut</dt>
+            <dd class="col-sm-9"><span class="badge text-bg-{{ contrat.statut.couleur }}">{{ contrat.statut.libelle }}</span></dd>
+            <dt class="col-sm-3">Émis le</dt>
+            <dd class="col-sm-9">{{ contrat.dateEmission|date('d/m/Y') }}{% if contrat.dateValidite %} · valide jusqu'au {{ contrat.dateValidite|date('d/m/Y') }}{% endif %}</dd>
+            {% if contrat.notes %}<dt class="col-sm-3">Notes</dt><dd class="col-sm-9">{{ contrat.notes|nl2br }}</dd>{% endif %}
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead class="table-light"><tr><th>Désignation</th><th class="text-end">Qté</th><th class="text-end">PU HT</th><th class="text-end">TVA</th><th class="text-end">Montant HT</th></tr></thead>
+            <tbody>
+            {% for ligne in contrat.lignes %}
+                <tr>
+                    <td>{{ ligne.designation }}</td>
+                    <td class="text-end">{{ ligne.quantite }}</td>
+                    <td class="text-end">{{ ligne.prixUnitaireHt|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end">{{ ligne.tauxTva }} %</td>
+                    <td class="text-end">{{ ligne.montantHt|number_format(2, ',', ' ') }} €</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-3">Aucune ligne.</td></tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><th colspan="4" class="text-end">Total HT</th><th class="text-end">{{ contrat.totalHt|number_format(2, ',', ' ') }} €</th></tr>
+                <tr><th colspan="4" class="text-end">TVA</th><th class="text-end">{{ contrat.totalTva|number_format(2, ',', ' ') }} €</th></tr>
+                <tr class="table-light"><th colspan="4" class="text-end">Total TTC</th><th class="text-end">{{ contrat.totalTtc|number_format(2, ',', ' ') }} €</th></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% include 'piece/_section.html.twig' with {pieces: contrat.piecesJointes, cible: 'contrat', cible_id: contrat.id} %}
+{% endblock %}

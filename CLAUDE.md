@@ -65,8 +65,19 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - EasyAdmin 5.1 : menu via `MenuItem::linkTo(XxxCrudController::class, label, icon)` ;
   panneaux via `FormField::addFieldset()` (pas `addPanel`).
 
+## Pièces jointes (Phase 2)
+- Entité `PieceJointe` rattachable à un `Projet` et/ou un `Contrat` (relation `Facture` en Phase 3).
+- Fichiers stockés hors web dans `var/uploads/pieces/` (gitignoré via `var/`), servis par
+  `PieceJointeController` (download sécurisé `ROLE_USER`). Upload manuel (pas de VichUploader).
+
+## Lignes de documents
+- `LigneDocument` est partagée : pour l'instant rattachée au `Contrat` (FK `facture` ajoutée en Phase 3).
+- Saisie dynamique des lignes via `CollectionType` + JS vanilla (prototype) dans
+  `templates/contrat/form.html.twig` — pas de build front.
+
 ## État (phases livrées)
 - **Phase 0** : socle (auth, Société, Modules, RBAC, EasyAdmin admin).
-- **Phase 1** : Contacts, Catalogue (Produits) dans l'appli de base.
-- À venir : Projets/Contrats, Facturation (PDF), Vente directe, Stock+Commandes,
+- **Phase 1** : Contacts, Catalogue (Produits).
+- **Phase 2** : Projets, Contrats/Devis (lignes + totaux HT/TVA/TTC), Pièces jointes.
+- À venir : Facturation (PDF, avoir = négatif), Vente directe, Stock+Commandes,
   Dépenses+Statistiques, Compta/Factur-X.

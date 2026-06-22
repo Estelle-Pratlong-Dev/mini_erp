@@ -30,6 +30,22 @@
                 </a>
             </li>
             {% endif %}
+
+            {% if module_actif('PROJETS') %}
+            <li>
+                <a href="{{ path('app_projet_index') }}" class="nav-link text-white {{ app.request.attributes.get('_route') starts with 'app_projet' ? 'active' : '' }}">
+                    <i class="bi bi-folder me-2"></i>Projets
+                </a>
+            </li>
+            {% endif %}
+
+            {% if module_actif('CONTRATS') %}
+            <li>
+                <a href="{{ path('app_contrat_index') }}" class="nav-link text-white {{ app.request.attributes.get('_route') starts with 'app_contrat' ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text me-2"></i>Devis / Contrats
+                </a>
+            </li>
+            {% endif %}
         </ul>
         <hr>
         <div class="dropdown">

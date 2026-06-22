@@ -42,6 +42,8 @@ class AppInstallCommand extends Command
     private const DEFAUT_ACTIFS = [
         CodeModule::CONTACTS->value,
         CodeModule::CATALOGUE->value,
+        CodeModule::PROJETS->value,
+        CodeModule::CONTRATS->value,
     ];
 
     public function __construct(

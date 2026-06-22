@@ -1,0 +1,67 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}{{ projet.nom }} — mini ERP{% endblock %}
+{% block page_title %}Projet : {{ projet.nom }}{% endblock %}
+{% block page_actions %}
+    {% if is_granted('ROLE_PROJETS_MODIFIER') %}
+        <a href="{{ path('app_projet_edit', {id: projet.id}) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Modifier</a>
+    {% endif %}
+    {% if is_granted('ROLE_PROJETS_SUPPRIMER') %}
+        <form method="post" action="{{ path('app_projet_delete', {id: projet.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce projet et tous ses contrats ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ projet.id) }}">
+            <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Supprimer</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Statut</dt>
+                    <dd class="col-sm-8"><span class="badge text-bg-{{ projet.statut.couleur }}">{{ projet.statut.libelle }}</span></dd>
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">{{ projet.date ? projet.date|date('d/m/Y') : '—' }}</dd>
+                    <dt class="col-sm-4">Client</dt>
+                    <dd class="col-sm-8">{{ projet.contact ?: '—' }}</dd>
+                    <dt class="col-sm-4">Description</dt>
+                    <dd class="col-sm-8">{{ projet.description|nl2br ?: '—' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        {% include 'piece/_section.html.twig' with {pieces: projet.piecesJointes, cible: 'projet', cible_id: projet.id} %}
+    </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-file-earmark-text"></i> Devis / Contrats</span>
+        {% if module_actif('CONTRATS') and is_granted('ROLE_CONTRATS_CREER') %}
+            <a href="{{ path('app_contrat_new', {projet: projet.id}) }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nouveau</a>
+        {% endif %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>Type</th><th>Réf.</th><th>Date</th><th>Statut</th><th class="text-end">Total TTC</th><th></th></tr></thead>
+            <tbody>
+            {% for contrat in projet.contrats %}
+                <tr>
+                    <td>{{ contrat.type.libelle }}</td>
+                    <td>{{ contrat.reference ?: '—' }}</td>
+                    <td>{{ contrat.dateEmission|date('d/m/Y') }}</td>
+                    <td><span class="badge text-bg-{{ contrat.statut.couleur }}">{{ contrat.statut.libelle }}</span></td>
+                    <td class="text-end">{{ contrat.totalTtc|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end"><a href="{{ path('app_contrat_show', {id: contrat.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-3">Aucun document.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
