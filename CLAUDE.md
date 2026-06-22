@@ -64,9 +64,15 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   référence produit) — à gérer si on veut réutiliser ces valeurs.
 
 ### Audit
-- `App\Trait\TimestampableTrait` (`createdAt/By`, `updatedAt/By`) sur les entités métier.
+- `App\Trait\TimestampableTrait` : champs **en français** `creeLe` / `creePar` / `modifieLe` /
+  `modifiePar` (colonnes `cree_le`, `cree_par_id`, `modifie_le`, `modifie_par_id`) sur les
+  entités métier (Contact, Produit, Projet, Contrat).
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`
   (Doctrine prePersist/preUpdate). Pas besoin de le faire dans les contrôleurs.
+
+### Convention de nommage
+- **Tout le schéma est en français** (propriétés et colonnes). Seuls restent en anglais des
+  champs techniques standard de Symfony sur `User` : `email`, `password`, `roles`.
 
 ## Conventions
 

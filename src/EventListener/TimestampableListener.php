@@ -10,7 +10,7 @@ use Doctrine\ORM\Events;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Remplit automatiquement les champs d'audit (createdAt/By, updatedAt/By)
+ * Remplit automatiquement les champs d'audit (creeLe/creePar, modifieLe/modifiePar)
  * pour toute entité exposant les setters correspondants (trait TimestampableTrait).
  */
 #[AsDoctrineListener(event: Events::prePersist)]
@@ -26,17 +26,17 @@ class TimestampableListener
         $entity = $args->getObject();
         $now = new \DateTimeImmutable();
 
-        if (method_exists($entity, 'setCreatedAt') && $entity->getCreatedAt() === null) {
-            $entity->setCreatedAt($now);
+        if (method_exists($entity, 'setCreeLe') && $entity->getCreeLe() === null) {
+            $entity->setCreeLe($now);
         }
-        if (method_exists($entity, 'setCreatedBy') && $entity->getCreatedBy() === null) {
-            $entity->setCreatedBy($this->currentUser());
+        if (method_exists($entity, 'setCreePar') && $entity->getCreePar() === null) {
+            $entity->setCreePar($this->currentUser());
         }
-        if (method_exists($entity, 'setUpdatedAt')) {
-            $entity->setUpdatedAt($now);
+        if (method_exists($entity, 'setModifieLe')) {
+            $entity->setModifieLe($now);
         }
-        if (method_exists($entity, 'setUpdatedBy')) {
-            $entity->setUpdatedBy($this->currentUser());
+        if (method_exists($entity, 'setModifiePar')) {
+            $entity->setModifiePar($this->currentUser());
         }
     }
 
@@ -45,12 +45,12 @@ class TimestampableListener
         $entity = $args->getObject();
 
         $changed = false;
-        if (method_exists($entity, 'setUpdatedAt')) {
-            $entity->setUpdatedAt(new \DateTimeImmutable());
+        if (method_exists($entity, 'setModifieLe')) {
+            $entity->setModifieLe(new \DateTimeImmutable());
             $changed = true;
         }
-        if (method_exists($entity, 'setUpdatedBy')) {
-            $entity->setUpdatedBy($this->currentUser());
+        if (method_exists($entity, 'setModifiePar')) {
+            $entity->setModifiePar($this->currentUser());
             $changed = true;
         }
 
