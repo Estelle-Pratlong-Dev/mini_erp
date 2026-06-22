@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Attribute\RequireModule;
 use App\Entity\Contrat;
-use App\Entity\LigneDocument;
+use App\Entity\LigneArticle;
 use App\Entity\Projet;
 use App\Enum\CodeModule;
 use App\Form\ContratType;
@@ -61,7 +61,7 @@ class ContratController extends AbstractController
 
         // Toujours afficher au moins une ligne à remplir (ne dépend pas du JS).
         if ($contrat->getLignes()->isEmpty()) {
-            $contrat->addLigne(new LigneDocument());
+            $contrat->addLigne(new LigneArticle());
         }
 
         $form = $this->createForm(ContratType::class, $contrat);

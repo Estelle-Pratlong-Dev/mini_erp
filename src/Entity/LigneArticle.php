@@ -2,17 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\LigneDocumentRepository;
+use App\Repository\LigneArticleRepository;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Ligne d'un document commercial (devis/contrat ; et facture en Phase 3).
- * Réutilisable : un seul des parents (contrat/facture) est renseigné.
+ * Ligne d'article d'un document commercial (devis/contrat ; et facture en Phase 3).
+ * Chaque ligne référence un article du catalogue. Réutilisable : un seul des
+ * parents (contrat/facture) est renseigné.
  */
-#[ORM\Entity(repositoryClass: LigneDocumentRepository::class)]
-class LigneDocument
+#[ORM\Entity(repositoryClass: LigneArticleRepository::class)]
+class LigneArticle
 {
     use TimestampableTrait;
 

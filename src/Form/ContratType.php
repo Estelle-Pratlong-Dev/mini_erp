@@ -41,7 +41,7 @@ class ContratType extends AbstractType
             ->add('dateValidite', DateType::class, ['label' => 'Valide jusqu\'au', 'widget' => 'single_text', 'required' => false])
             ->add('notes', TextareaType::class, ['label' => 'Notes', 'required' => false])
             ->add('lignes', CollectionType::class, [
-                'entry_type' => LigneDocumentType::class,
+                'entry_type' => LigneArticleType::class,
                 'label' => false,
                 'allow_add' => true,
                 'allow_delete' => true,

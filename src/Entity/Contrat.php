@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Devis ou contrat rattaché à un projet. Composé de lignes (LigneDocument).
+ * Devis ou contrat rattaché à un projet. Composé de lignes (LigneArticle).
  * Convertible en facture (Phase 3).
  */
 #[ORM\Entity(repositoryClass: ContratRepository::class)]
@@ -49,8 +49,8 @@ class Contrat implements SoftDeletableInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    /** @var Collection<int, LigneDocument> */
-    #[ORM\OneToMany(targetEntity: LigneDocument::class, mappedBy: 'contrat', cascade: ['persist'], orphanRemoval: true)]
+    /** @var Collection<int, LigneArticle> */
+    #[ORM\OneToMany(targetEntity: LigneArticle::class, mappedBy: 'contrat', cascade: ['persist'], orphanRemoval: true)]
     #[Assert\Valid]
     #[Assert\Count(min: 1, minMessage: 'Ajoutez au moins une ligne (un article du catalogue).')]
     private Collection $lignes;
@@ -91,10 +91,10 @@ class Contrat implements SoftDeletableInterface
     public function getNotes(): ?string { return $this->notes; }
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }
 
-    /** @return Collection<int, LigneDocument> */
+    /** @return Collection<int, LigneArticle> */
     public function getLignes(): Collection { return $this->lignes; }
 
-    public function addLigne(LigneDocument $ligne): static
+    public function addLigne(LigneArticle $ligne): static
     {
         if (!$this->lignes->contains($ligne)) {
             $this->lignes->add($ligne);
@@ -103,7 +103,7 @@ class Contrat implements SoftDeletableInterface
         return $this;
     }
 
-    public function removeLigne(LigneDocument $ligne): static
+    public function removeLigne(LigneArticle $ligne): static
     {
         if ($this->lignes->removeElement($ligne) && $ligne->getContrat() === $this) {
             $ligne->setContrat(null);

@@ -69,7 +69,7 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ### Audit
 - `App\Trait\TimestampableTrait` : champs **en français** `creeLe` / `creePar` / `modifieLe` /
   `modifiePar` (colonnes `cree_le`, `cree_par_id`, `modifie_le`, `modifie_par_id`).
-- Présent sur **toutes les entités** (Contact, Produit, Projet, Contrat, LigneDocument,
+- Présent sur **toutes les entités** (Contact, Produit, Projet, Contrat, LigneArticle,
   PieceJointe, User, Societe, Module, Role, Permission).
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`
   (Doctrine prePersist/preUpdate). Pas besoin de le faire dans les contrôleurs.
@@ -92,7 +92,9 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   `PieceJointeController` (download sécurisé `ROLE_USER`). Upload manuel (pas de VichUploader).
 
 ## Lignes de documents
-- `LigneDocument` est partagée : pour l'instant rattachée au `Contrat` (FK `facture` ajoutée en Phase 3).
+- `LigneArticle` (table `ligne_article`) = les **lignes d'articles** d'un document commercial.
+  Partagée : pour l'instant rattachée au `Contrat` (FK `facture` ajoutée en Phase 3).
+  À ne pas confondre avec `PieceJointe` (fichiers joints) ni le PDF imprimable (généré à la volée).
 - Saisie dynamique des lignes via `CollectionType` + JS vanilla (prototype) dans
   `templates/contrat/form.html.twig` — pas de build front.
 
