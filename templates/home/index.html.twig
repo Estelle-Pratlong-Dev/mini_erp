@@ -1,0 +1,53 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}Tableau de bord — mini ERP{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block main %}
+<div class="row g-3">
+    {% if stats.contacts is defined %}
+    <div class="col-md-3">
+        <div class="card text-bg-primary shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-2 fw-bold">{{ stats.contacts }}</div>
+                        <div>Contacts</div>
+                    </div>
+                    <i class="bi bi-people fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <a href="{{ path('app_contact_index') }}" class="card-footer text-white text-decoration-none small">
+                Voir les contacts <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if stats.produits is defined %}
+    <div class="col-md-3">
+        <div class="card text-bg-success shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-2 fw-bold">{{ stats.produits }}</div>
+                        <div>Produits</div>
+                    </div>
+                    <i class="bi bi-box-seam fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <a href="{{ path('app_produit_index') }}" class="card-footer text-white text-decoration-none small">
+                Voir le catalogue <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if stats is empty %}
+    <div class="alert alert-info mt-3">
+        Aucun module métier n'est activé. Un administrateur peut les activer depuis
+        l'<a href="{{ path('admin') }}">espace d'administration</a>.
+    </div>
+{% endif %}
+{% endblock %}

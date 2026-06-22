@@ -1,0 +1,47 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}Contacts — mini ERP{% endblock %}
+{% block page_title %}Contacts{% endblock %}
+{% block page_actions %}
+    {% if is_granted('ROLE_CONTACTS_CREER') %}
+        <a href="{{ path('app_contact_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouveau</a>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Type</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Ville</th><th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for contact in contacts %}
+                <tr>
+                    <td><span class="badge text-bg-secondary">{{ contact.type.libelle }}</span></td>
+                    <td>{{ contact }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>{{ contact.telephone }}</td>
+                    <td>{{ contact.ville }}</td>
+                    <td class="text-end">
+                        {% if is_granted('ROLE_CONTACTS_MODIFIER') %}
+                            <a href="{{ path('app_contact_edit', {id: contact.id}) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
+                        {% if is_granted('ROLE_CONTACTS_SUPPRIMER') %}
+                            <form method="post" action="{{ path('app_contact_delete', {id: contact.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce contact ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contact.id) }}">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Aucun contact.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

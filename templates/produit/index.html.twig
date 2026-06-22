@@ -1,0 +1,55 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}Catalogue — mini ERP{% endblock %}
+{% block page_title %}Catalogue{% endblock %}
+{% block page_actions %}
+    {% if is_granted('ROLE_CATALOGUE_CREER') %}
+        <a href="{{ path('app_produit_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouveau</a>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Référence</th><th>Désignation</th><th>Type</th>
+                    <th class="text-end">Prix HT</th><th class="text-end">Stock</th><th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for produit in produits %}
+                <tr>
+                    <td><code>{{ produit.reference }}</code></td>
+                    <td>{{ produit.designation }}</td>
+                    <td><span class="badge text-bg-secondary">{{ produit.type.libelle }}</span></td>
+                    <td class="text-end">{{ produit.prixHt }} €</td>
+                    <td class="text-end">
+                        {% if produit.gereStock %}
+                            {% set rupture = produit.stockMin is not null and produit.stockActuel|number_format(3, '.', '') < produit.stockMin|number_format(3, '.', '') %}
+                            <span class="badge text-bg-{{ rupture ? 'danger' : 'success' }}">{{ produit.stockActuel }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if is_granted('ROLE_CATALOGUE_MODIFIER') %}
+                            <a href="{{ path('app_produit_edit', {id: produit.id}) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
+                        {% if is_granted('ROLE_CATALOGUE_SUPPRIMER') %}
+                            <form method="post" action="{{ path('app_produit_delete', {id: produit.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce produit ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Aucun produit.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
