@@ -6,6 +6,7 @@ use App\Entity\Produit;
 use App\Enum\TypeProduit;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -34,7 +35,15 @@ class ProduitType extends AbstractType
             ->add('gereStock', CheckboxType::class, ['label' => 'Suivre le stock', 'required' => false])
             ->add('stockActuel', NumberType::class, ['label' => 'Stock actuel', 'scale' => 3])
             ->add('stockMin', NumberType::class, ['label' => 'Seuil d\'alerte', 'required' => false, 'scale' => 3])
-            ->add('actif', CheckboxType::class, ['label' => 'Actif', 'required' => false]);
+            ->add('actif', CheckboxType::class, ['label' => 'Actif', 'required' => false])
+            ->add('composants', CollectionType::class, [
+                'entry_type' => ComposantType::class,
+                'label' => false,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'prototype' => true,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

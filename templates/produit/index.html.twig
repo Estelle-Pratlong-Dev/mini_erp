@@ -22,7 +22,7 @@
             {% for produit in produits %}
                 <tr>
                     <td><code>{{ produit.reference }}</code></td>
-                    <td>{{ produit.designation }}</td>
+                    <td>{{ produit.designation }}{% if produit.compose %} <span class="badge text-bg-info">Composé</span>{% endif %}</td>
                     <td><span class="badge text-bg-secondary">{{ produit.type.libelle }}</span></td>
                     <td class="text-end">{{ produit.prixHt }} €</td>
                     <td class="text-end">

@@ -13,9 +13,12 @@ use App\Repository\ProduitRepository;
 use App\State\SoftDeleteProcessor;
 use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
@@ -25,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     shortName: 'Produit',
     description: 'Articles du catalogue',
-    normalizationContext: ['groups' => ['produit:read']],
+    normalizationContext: ['groups' => ['produit:read'], 'enable_max_depth' => true],
     denormalizationContext: ['groups' => ['produit:write']],
     operations: [
         new GetCollection(security: "is_granted('ROLE_CATALOGUE_VOIR')"),
@@ -94,7 +97,23 @@ class Produit implements SoftDeletableInterface
     #[Groups(['produit:read', 'produit:write'])]
     private bool $actif = true;
 
+    /**
+     * Composants (nomenclature) : si non vide, ce produit est "composé".
+     *
+     * @var Collection<int, Composant>
+     */
+    #[ORM\OneToMany(targetEntity: Composant::class, mappedBy: 'produitParent', cascade: ['persist'], orphanRemoval: true)]
+    #[Assert\Valid]
+    #[Groups(['produit:read', 'produit:write'])]
+    #[MaxDepth(1)]
+    private Collection $composants;
+
     use TimestampableTrait;
+
+    public function __construct()
+    {
+        $this->composants = new ArrayCollection();
+    }
 
     public function getId(): ?int { return $this->id; }
 
@@ -123,13 +142,40 @@ class Produit implements SoftDeletableInterface
     public function setGereStock(bool $gereStock): static { $this->gereStock = $gereStock; return $this; }
 
     public function getStockActuel(): ?string { return $this->stockActuel; }
-    public function setStockActuel(string $stockActuel): static { $this->stockActuel = $stockActuel; return $this; }
+    public function setStockActuel(?string $stockActuel): static { $this->stockActuel = $stockActuel ?? '0'; return $this; }
 
     public function getStockMin(): ?string { return $this->stockMin; }
     public function setStockMin(?string $stockMin): static { $this->stockMin = $stockMin; return $this; }
 
     public function isActif(): bool { return $this->actif; }
     public function setActif(bool $actif): static { $this->actif = $actif; return $this; }
+
+    /** @return Collection<int, Composant> */
+    public function getComposants(): Collection { return $this->composants; }
+
+    public function addComposant(Composant $composant): static
+    {
+        if (!$this->composants->contains($composant)) {
+            $this->composants->add($composant);
+            $composant->setProduitParent($this);
+        }
+        return $this;
+    }
+
+    public function removeComposant(Composant $composant): static
+    {
+        if ($this->composants->removeElement($composant) && $composant->getProduitParent() === $this) {
+            $composant->setProduitParent(null);
+        }
+        return $this;
+    }
+
+    /** Vrai si ce produit est composé d'autres articles (nomenclature). */
+    #[Groups(['produit:read'])]
+    public function isCompose(): bool
+    {
+        return !$this->composants->isEmpty();
+    }
 
     #[Groups(['produit:read'])]
     public function getPrixTtc(): float

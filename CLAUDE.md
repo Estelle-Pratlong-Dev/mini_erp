@@ -153,6 +153,15 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
   templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 
+## Produits composés (nomenclature / BOM)
+- Un `Produit` peut avoir des **`Composant`** (table `composant` : produit parent + article
+  composant + quantité). `Produit::isCompose()` indique s'il est composé.
+- Géré dans le **catalogue** (formulaire produit, collection dynamique de composants).
+- `App\Service\NomenclatureService::besoins(Produit, qté)` **éclate** récursivement un produit
+  composé en besoins d'articles de base (compositions imbriquées, protection anti-cycle).
+- La **décrémentation réelle du stock** des composants se fera dans le module **Stock / Vente**
+  (utilisera `NomenclatureService`). Aujourd'hui : modèle + éclatement prêts, pas de mouvement de stock.
+
 ## État (phases livrées)
 - **Phase 0** : socle (auth, Société, Modules, RBAC, EasyAdmin admin).
 - **Phase 1** : Contacts, Catalogue (Produits).
