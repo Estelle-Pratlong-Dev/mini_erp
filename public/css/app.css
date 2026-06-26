@@ -108,10 +108,10 @@ a:hover { color: var(--brand-dark); text-decoration: underline; }
 h1.h3 { font-weight: 600; }
 .badge { font-weight: 600; letter-spacing: .02em; }
 
-/* Contenu centré et cadré sur grand écran */
+/* Contenu cadré (largeur max) mais aligné à gauche, collé à la barre latérale */
 .app-content {
-    max-width: 1200px;
-    margin-left: auto;
+    max-width: 1320px;
+    margin-left: 0;
     margin-right: auto;
     width: 100%;
 }
