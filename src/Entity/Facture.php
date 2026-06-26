@@ -73,6 +73,11 @@ class Facture implements SoftDeletableInterface
     #[Groups(['facture:read', 'facture:write'])]
     private ?Contrat $contrat = null;
 
+    /** Rang de la facture dans son contrat (1 = première), figé à la création. Null si facture directe. */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['facture:read'])]
+    private ?int $rangContrat = null;
+
     #[ORM\Column(length: 20, enumType: StatutFacture::class)]
     #[Groups(['facture:read', 'facture:write'])]
     private StatutFacture $statut = StatutFacture::EN_ATTENTE;
@@ -138,6 +143,9 @@ class Facture implements SoftDeletableInterface
 
     public function getContrat(): ?Contrat { return $this->contrat; }
     public function setContrat(?Contrat $contrat): static { $this->contrat = $contrat; return $this; }
+
+    public function getRangContrat(): ?int { return $this->rangContrat; }
+    public function setRangContrat(?int $rang): static { $this->rangContrat = $rang; return $this; }
 
     public function getStatut(): StatutFacture { return $this->statut; }
     public function setStatut(StatutFacture $statut): static { $this->statut = $statut; return $this; }

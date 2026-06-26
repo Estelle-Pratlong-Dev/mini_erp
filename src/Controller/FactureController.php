@@ -93,10 +93,11 @@ class FactureController extends AbstractController
             ->setContrat($contrat)
             ->setNotes($contrat->getNotes());
 
-        // Snapshot du déjà-facturé (facturation à l'avancement) figé à la création.
+        // Snapshot du déjà-facturé (facturation à l'avancement) + rang, figés à la création.
         $dejaHt = 0.0;
         $dejaTva = 0.0;
-        foreach ($factureRepository->duContrat($contrat) as $factureExistante) {
+        $existantes = $factureRepository->duContrat($contrat);
+        foreach ($existantes as $factureExistante) {
             $dejaHt += $factureExistante->getTotalHt();
             $dejaTva += $factureExistante->getTotalTva();
         }
@@ -104,6 +105,7 @@ class FactureController extends AbstractController
             $facture->setMontantDejaFactureHt(number_format($dejaHt, 2, '.', ''));
             $facture->setMontantDejaFactureTva(number_format($dejaTva, 2, '.', ''));
         }
+        $facture->setRangContrat(count($existantes) + 1);
 
         foreach ($contrat->getLignes() as $ligneContrat) {
             $ligne = (new LigneArticle())
@@ -130,7 +132,7 @@ class FactureController extends AbstractController
     {
         return $this->render('facture/show.html.twig', [
             'facture' => $facture,
-            'rangContrat' => $factureRepository->rangDansContrat($facture),
+            'rangContrat' => $facture->getRangContrat() ?? $factureRepository->rangDansContrat($facture),
             'nbContrat' => $factureRepository->nombreDuContrat($facture),
         ]);
     }
@@ -157,7 +159,7 @@ class FactureController extends AbstractController
             'form' => $form,
             'titre' => 'Modifier la facture',
             'lignesModifiables' => $lignesModifiables,
-            'rangContrat' => $factureRepository->rangDansContrat($facture),
+            'rangContrat' => $facture->getRangContrat() ?? $factureRepository->rangDansContrat($facture),
             'nbContrat' => $factureRepository->nombreDuContrat($facture),
         ]);
     }
