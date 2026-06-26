@@ -74,6 +74,19 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`
   (Doctrine prePersist/preUpdate). Pas besoin de le faire dans les contrôleurs.
 
+### API REST (API Platform)
+- Exposition **déclarative** via l'attribut `#[ApiResource]` **sur l'entité** (pas de contrôleur).
+  Exemple : `src/Entity/Contact.php` → endpoints `/api/contacts` (GET liste/détail, POST, PATCH, DELETE).
+- **Groupes de sérialisation** (`#[Groups(['contact:read'/'contact:write'])]`) pour ne pas exposer
+  l'audit ni `supprime`.
+- **Sécurité par opération** réutilisant le RBAC : `security: "is_granted('ROLE_CONTACTS_VOIR')"` etc.
+- **DELETE = soft delete** via `App\State\SoftDeleteProcessor` (cohérent avec le reste de l'app).
+- Le filtre soft-delete et le listener d'audit s'appliquent **automatiquement** aussi à l'API.
+- Doc interactive : `/api/docs`. Config : `config/packages/api_platform.yaml`
+  (actuellement `stateless: false` → réutilise l'auth par **session** ; pour une vraie API,
+  prévoir un **firewall `/api` stateless + JWT**).
+- Pour exposer une autre entité : ajouter le même `#[ApiResource]` + `#[Groups]` dessus.
+
 ### Convention de nommage
 - **Tout le schéma est en français** (propriétés et colonnes). Seuls restent en anglais des
   champs techniques standard de Symfony sur `User` : `email`, `password`, `roles`.

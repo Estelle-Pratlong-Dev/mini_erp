@@ -2,15 +2,36 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\TypeContact;
 use App\Repository\ContactRepository;
+use App\State\SoftDeleteProcessor;
 use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
+#[ApiResource(
+    shortName: 'Contact',
+    description: 'Contacts / clients de l\'entreprise',
+    normalizationContext: ['groups' => ['contact:read']],
+    denormalizationContext: ['groups' => ['contact:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_CONTACTS_VOIR')"),
+        new Get(security: "is_granted('ROLE_CONTACTS_VOIR')"),
+        new Post(security: "is_granted('ROLE_CONTACTS_CREER')"),
+        new Patch(security: "is_granted('ROLE_CONTACTS_MODIFIER')"),
+        new Delete(security: "is_granted('ROLE_CONTACTS_SUPPRIMER')", processor: SoftDeleteProcessor::class),
+    ],
+)]
 class Contact implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
@@ -18,45 +39,58 @@ class Contact implements SoftDeletableInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['contact:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50, enumType: TypeContact::class)]
+    #[Groups(['contact:read', 'contact:write'])]
     private TypeContact $type = TypeContact::PARTICULIER;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 14, nullable: true)]
     #[Assert\Regex(pattern: '/^[0-9]{14}$/', message: 'Le SIRET doit contenir 14 chiffres.')]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $siret = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $numTva = null;
 
     #[ORM\Column(length: 180, nullable: true)]
     #[Assert\Email]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $adresse = null;
 
     #[ORM\Column(length: 10, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $codePostal = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $ville = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $pays = 'France';
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
     private ?string $notes = null;
 
     use TimestampableTrait;
