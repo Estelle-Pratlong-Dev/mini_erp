@@ -19,7 +19,21 @@ php bin/console cache:clear
 php bin/console make:migration                 # générer une migration depuis les entités
 php bin/console doctrine:migrations:migrate    # appliquer
 php bin/console app:install                    # (idempotent) seed modules/permissions/admin/société
+
+# Tests
+php bin/phpunit                                # toute la suite
+php bin/phpunit tests/Unit                     # tests unitaires uniquement
+# Base de test (à créer une fois) :
+php bin/console --env=test doctrine:database:create --if-not-exists
+php bin/console --env=test doctrine:migrations:migrate --no-interaction
 ```
+
+## Tests
+- **PHPUnit** (symfony/test-pack). Base de test : `mini_erp_test` (suffixe `_test` ajouté par
+  `doctrine` en env test ; `DATABASE_URL` dans `.env.test`).
+- `tests/Unit/` : tests purs sans base (totaux Contrat/LigneArticle, RBAC `User::getRoles`).
+- `tests/Functional/` : `KernelTestCase` avec base, isolés par transaction annulée
+  (filtre soft-delete, validations métier).
 
 Base : MySQL Laragon (`root` sans mot de passe), configurée dans `.env.local`.
 Client mysql : `C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -uroot mini_erp`.
