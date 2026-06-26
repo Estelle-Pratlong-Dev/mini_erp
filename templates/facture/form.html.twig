@@ -11,6 +11,12 @@
 <div class="card shadow-sm">
     <div class="card-body">
         {{ form_start(form) }}
+        {% if rangContrat is defined and rangContrat %}
+            <div class="alert alert-light border d-inline-block py-2">
+                <i class="bi bi-info-circle"></i> Facture <strong>{{ rangContrat }}</strong> sur <strong>{{ nbContrat }}</strong> de ce contrat
+                {% if rangContrat == 1 %}(première facture){% endif %}
+            </div>
+        {% endif %}
         <div class="row g-3">
             <div class="col-md-4">{{ form_row(form.projet) }}</div>
             <div class="col-md-4">{{ form_row(form.contact) }}</div>

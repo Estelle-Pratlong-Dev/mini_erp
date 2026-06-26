@@ -126,9 +126,13 @@ class FactureController extends AbstractController
 
     #[Route('/{id}', name: 'app_facture_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_FACTURATION_VOIR')]
-    public function show(Facture $facture): Response
+    public function show(Facture $facture, FactureRepository $factureRepository): Response
     {
-        return $this->render('facture/show.html.twig', ['facture' => $facture]);
+        return $this->render('facture/show.html.twig', [
+            'facture' => $facture,
+            'rangContrat' => $factureRepository->rangDansContrat($facture),
+            'nbContrat' => $factureRepository->nombreDuContrat($facture),
+        ]);
     }
 
     #[Route('/{id}/modifier', name: 'app_facture_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
@@ -153,6 +157,8 @@ class FactureController extends AbstractController
             'form' => $form,
             'titre' => 'Modifier la facture',
             'lignesModifiables' => $lignesModifiables,
+            'rangContrat' => $factureRepository->rangDansContrat($facture),
+            'nbContrat' => $factureRepository->nombreDuContrat($facture),
         ]);
     }
 

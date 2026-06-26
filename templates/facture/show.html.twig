@@ -26,6 +26,10 @@
             {% if facture.contrat %}
                 <dt class="col-sm-3">Issue du contrat</dt>
                 <dd class="col-sm-9"><a href="{{ path('app_contrat_show', {id: facture.contrat.id}) }}">{{ facture.contrat }}</a></dd>
+                {% if rangContrat %}
+                    <dt class="col-sm-3">Rang sur le contrat</dt>
+                    <dd class="col-sm-9"><span class="badge text-bg-secondary">Facture {{ rangContrat }} / {{ nbContrat }}</span> de ce contrat</dd>
+                {% endif %}
             {% endif %}
             <dt class="col-sm-3">Statut</dt>
             <dd class="col-sm-9"><span class="badge text-bg-{{ facture.statut.couleur }}">{{ facture.statut.libelle }}</span></dd>

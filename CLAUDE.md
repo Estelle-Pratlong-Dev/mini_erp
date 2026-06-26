@@ -150,6 +150,8 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   sinon) — voir `FactureRepository::estDerniere()` + option `lignes_modifiables` du `FactureType`.
 - **Délai de paiement** (`DelaiPaiement` : à réception / à la commande / 15-30-45-60 j) calcule
   l'échéance (champ échéance conservé, éditable).
+- **Rang de la facture dans son contrat** (1ʳᵉ, 2ᵉ…) affiché en lecture seule sur le show et l'edit
+  (`FactureRepository::rangDansContrat()` / `nombreDuContrat()`).
 - **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
   templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 

@@ -28,6 +28,32 @@ class FactureRepository extends ServiceEntityRepository
     }
 
     /**
+     * Rang (1-based) de la facture parmi celles de son contrat. null si facture directe.
+     */
+    public function rangDansContrat(Facture $facture): ?int
+    {
+        $contrat = $facture->getContrat();
+        if ($contrat === null) {
+            return null;
+        }
+        foreach ($this->duContrat($contrat) as $i => $f) {
+            if ($f->getId() === $facture->getId()) {
+                return $i + 1;
+            }
+        }
+
+        return null;
+    }
+
+    /** Nombre total de factures du contrat de cette facture (0 si facture directe). */
+    public function nombreDuContrat(Facture $facture): int
+    {
+        $contrat = $facture->getContrat();
+
+        return $contrat === null ? 0 : count($this->duContrat($contrat));
+    }
+
+    /**
      * Vrai si la facture est la plus récente de son contrat (donc modifiable).
      * Une facture sans contrat (directe) est toujours considérée modifiable.
      */
