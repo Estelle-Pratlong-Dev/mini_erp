@@ -107,4 +107,11 @@ a:hover { color: var(--brand-dark); text-decoration: underline; }
 /* ----- Divers ----- */
 h1.h3 { font-weight: 600; }
 .badge { font-weight: 600; letter-spacing: .02em; }
-main { max-width: 1280px; }
+
+/* Contenu centré et cadré sur grand écran */
+.app-content {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
