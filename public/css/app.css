@@ -1,0 +1,110 @@
+/* ---- Thème mini ERP : sobre et moderne (complète Bootstrap 5) ---- */
+:root {
+    --brand: #4f46e5;        /* indigo discret */
+    --brand-dark: #4338ca;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --bg: #f4f5f7;
+    --line: #eef0f3;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--ink);
+}
+
+/* ----- Barre latérale ----- */
+.app-sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    width: 256px;
+}
+.app-sidebar .brand {
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+.app-sidebar .nav-link {
+    color: #cbd5e1;
+    border-radius: .55rem;
+    margin-bottom: .15rem;
+    font-weight: 500;
+    transition: background-color .15s ease, color .15s ease;
+}
+.app-sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, .07);
+    color: #fff;
+}
+.app-sidebar .nav-link.active {
+    background: var(--brand) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, .35);
+}
+.app-sidebar hr { border-color: rgba(255, 255, 255, .12); }
+.app-sidebar .nav-section {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #64748b;
+    padding: .75rem .5rem .25rem;
+}
+
+/* ----- Cartes ----- */
+.card {
+    border: 0;
+    border-radius: .8rem;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+}
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    border-top-left-radius: .8rem !important;
+    border-top-right-radius: .8rem !important;
+}
+
+/* ----- Boutons & liens ----- */
+.btn { border-radius: .55rem; font-weight: 500; }
+.btn-primary {
+    --bs-btn-bg: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand-dark);
+    --bs-btn-hover-border-color: var(--brand-dark);
+    --bs-btn-active-bg: var(--brand-dark);
+    --bs-btn-active-border-color: var(--brand-dark);
+}
+.btn-outline-primary {
+    --bs-btn-color: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand);
+    --bs-btn-hover-border-color: var(--brand);
+    --bs-btn-active-bg: var(--brand);
+}
+a { color: var(--brand); text-decoration: none; }
+a:hover { color: var(--brand-dark); text-decoration: underline; }
+
+/* ----- Formulaires ----- */
+.form-label { font-weight: 500; color: #374151; margin-bottom: .3rem; }
+.form-control, .form-select {
+    border-color: #d1d5db;
+    border-radius: .55rem;
+    padding: .5rem .75rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 .2rem rgba(79, 70, 229, .15);
+}
+.form-text { color: var(--muted); }
+
+/* ----- Tableaux ----- */
+.table > thead th {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--muted);
+    font-weight: 600;
+}
+.table > tbody tr:hover > * { background-color: #fafbff; }
+
+/* ----- Divers ----- */
+h1.h3 { font-weight: 600; }
+.badge { font-weight: 600; letter-spacing: .02em; }
+main { max-width: 1280px; }
