@@ -10,6 +10,12 @@ Idées à intégrer plus tard, sans priorité immédiate.
 ## Exports
 - **Export des listes en Excel** (idéalement via une librairie type **PhpSpreadsheet**).
   Alternative simple : export CSV natif.
+- **Export comptable des listes** (factures, dépenses…) : format adapté à la compta
+  (journal des ventes, écritures, ou CSV/FEC selon besoin).
+
+## Filtres & recherche
+- **Filtrer les listes** (contacts, produits, projets, contrats, factures…) :
+  par statut, date, client, montant, recherche texte. (côté API : déjà natif via API Platform.)
 
 ## Documents imprimables
 - **Version téléchargeable / imprimable des factures et contrats**, **personnalisable par client**
