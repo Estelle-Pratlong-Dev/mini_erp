@@ -2,13 +2,21 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\StatutProjet;
 use App\Repository\ProjetRepository;
+use App\State\SoftDeleteProcessor;
 use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -16,6 +24,19 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Le nom est libre (nom du client, nom du marché, ou date du jour pour les ventes du jour).
  */
 #[ORM\Entity(repositoryClass: ProjetRepository::class)]
+#[ApiResource(
+    shortName: 'Projet',
+    description: 'Projets (regroupent contrats et factures)',
+    normalizationContext: ['groups' => ['projet:read']],
+    denormalizationContext: ['groups' => ['projet:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_PROJETS_VOIR')"),
+        new Get(security: "is_granted('ROLE_PROJETS_VOIR')"),
+        new Post(security: "is_granted('ROLE_PROJETS_CREER')"),
+        new Patch(security: "is_granted('ROLE_PROJETS_MODIFIER')"),
+        new Delete(security: "is_granted('ROLE_PROJETS_SUPPRIMER')", processor: SoftDeleteProcessor::class),
+    ],
+)]
 class Projet implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
@@ -23,23 +44,29 @@ class Projet implements SoftDeletableInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['projet:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['projet:read', 'projet:write'])]
     private ?string $nom = null;
 
     #[ORM\ManyToOne(targetEntity: Contact::class)]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['projet:read', 'projet:write'])]
     private ?Contact $contact = null;
 
     #[ORM\Column(type: 'date_immutable')]
+    #[Groups(['projet:read', 'projet:write'])]
     private ?\DateTimeImmutable $date = null;
 
     #[ORM\Column(length: 20, enumType: StatutProjet::class)]
+    #[Groups(['projet:read', 'projet:write'])]
     private StatutProjet $statut = StatutProjet::EN_COURS;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['projet:read', 'projet:write'])]
     private ?string $description = null;
 
     /** @var Collection<int, Contrat> */

@@ -2,14 +2,22 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\StatutContrat;
 use App\Enum\TypeContrat;
 use App\Repository\ContratRepository;
+use App\State\SoftDeleteProcessor;
 use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -17,6 +25,19 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Convertible en facture (Phase 3).
  */
 #[ORM\Entity(repositoryClass: ContratRepository::class)]
+#[ApiResource(
+    shortName: 'Contrat',
+    description: 'Devis / contrats (avec leurs lignes d\'articles)',
+    normalizationContext: ['groups' => ['contrat:read']],
+    denormalizationContext: ['groups' => ['contrat:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_CONTRATS_VOIR')"),
+        new Get(security: "is_granted('ROLE_CONTRATS_VOIR')"),
+        new Post(security: "is_granted('ROLE_CONTRATS_CREER')"),
+        new Patch(security: "is_granted('ROLE_CONTRATS_MODIFIER')"),
+        new Delete(security: "is_granted('ROLE_CONTRATS_SUPPRIMER')", processor: SoftDeleteProcessor::class),
+    ],
+)]
 class Contrat implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
@@ -24,35 +45,44 @@ class Contrat implements SoftDeletableInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['contrat:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?string $reference = null;
 
     #[ORM\ManyToOne(targetEntity: Projet::class, inversedBy: 'contrats')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?Projet $projet = null;
 
     #[ORM\Column(length: 20, enumType: TypeContrat::class)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private TypeContrat $type = TypeContrat::DEVIS;
 
     #[ORM\Column(length: 20, enumType: StatutContrat::class)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private StatutContrat $statut = StatutContrat::EN_ATTENTE;
 
     #[ORM\Column(type: 'date_immutable')]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?\DateTimeImmutable $dateEmission = null;
 
     #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?\DateTimeImmutable $dateValidite = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?string $notes = null;
 
     /** @var Collection<int, LigneArticle> */
     #[ORM\OneToMany(targetEntity: LigneArticle::class, mappedBy: 'contrat', cascade: ['persist'], orphanRemoval: true)]
     #[Assert\Valid]
     #[Assert\Count(min: 1, minMessage: 'Ajoutez au moins une ligne (un article du catalogue).')]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private Collection $lignes;
 
     /** @var Collection<int, PieceJointe> */
@@ -131,6 +161,7 @@ class Contrat implements SoftDeletableInterface
         return $this;
     }
 
+    #[Groups(['contrat:read'])]
     public function getTotalHt(): float
     {
         $total = 0.0;
@@ -140,6 +171,7 @@ class Contrat implements SoftDeletableInterface
         return round($total, 2);
     }
 
+    #[Groups(['contrat:read'])]
     public function getTotalTva(): float
     {
         $total = 0.0;
@@ -149,6 +181,7 @@ class Contrat implements SoftDeletableInterface
         return round($total, 2);
     }
 
+    #[Groups(['contrat:read'])]
     public function getTotalTtc(): float
     {
         return round($this->getTotalHt() + $this->getTotalTva(), 2);

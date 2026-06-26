@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\LigneArticleRepository;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -20,6 +21,7 @@ class LigneArticle
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['contrat:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Contrat::class, inversedBy: 'lignes')]
@@ -29,21 +31,26 @@ class LigneArticle
     #[ORM\ManyToOne(targetEntity: Produit::class)]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Chaque ligne doit référencer un article du catalogue.')]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?Produit $produit = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['contrat:read'])]
     private ?string $designation = null;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 3)]
     #[Assert\Positive]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?string $quantite = '1';
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     #[Assert\PositiveOrZero]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?string $prixUnitaireHt = '0.00';
 
     #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[Groups(['contrat:read', 'contrat:write'])]
     private ?string $tauxTva = '20.00';
 
     public function getId(): ?int { return $this->id; }
@@ -80,6 +87,7 @@ class LigneArticle
     public function getTauxTva(): ?string { return $this->tauxTva; }
     public function setTauxTva(string $taux): static { $this->tauxTva = $taux; return $this; }
 
+    #[Groups(['contrat:read'])]
     public function getMontantHt(): float
     {
         return round((float) $this->quantite * (float) $this->prixUnitaireHt, 2);

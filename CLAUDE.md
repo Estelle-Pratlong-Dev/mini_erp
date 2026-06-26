@@ -76,7 +76,10 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 
 ### API REST (API Platform)
 - Exposition **déclarative** via l'attribut `#[ApiResource]` **sur l'entité** (pas de contrôleur).
-  Exemple : `src/Entity/Contact.php` → endpoints `/api/contacts` (GET liste/détail, POST, PATCH, DELETE).
+- Entités exposées : **Contact** (`/api/contacts`), **Produit** (`/api/produits`),
+  **Projet** (`/api/projets`), **Contrat** (`/api/contrats`, avec ses **lignes imbriquées** en
+  lecture/écriture + totaux calculés). Chaque ressource a GET liste/détail, POST, PATCH, DELETE.
+- Relations exposées en **IRI** (ex. `projet: "/api/projets/4"`) ; formats `jsonld` et `json`.
 - **Groupes de sérialisation** (`#[Groups(['contact:read'/'contact:write'])]`) pour ne pas exposer
   l'audit ni `supprime`.
 - **Sécurité par opération** réutilisant le RBAC : `security: "is_granted('ROLE_CONTACTS_VOIR')"` etc.

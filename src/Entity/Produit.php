@@ -2,17 +2,38 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\TypeProduit;
 use App\Repository\ProduitRepository;
+use App\State\SoftDeleteProcessor;
 use App\Trait\SoftDeleteTrait;
 use App\Trait\TimestampableTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_PRODUIT_REFERENCE', fields: ['reference'])]
 #[UniqueEntity(fields: ['reference'], message: 'Cette référence existe déjà.')]
+#[ApiResource(
+    shortName: 'Produit',
+    description: 'Articles du catalogue',
+    normalizationContext: ['groups' => ['produit:read']],
+    denormalizationContext: ['groups' => ['produit:write']],
+    operations: [
+        new GetCollection(security: "is_granted('ROLE_CATALOGUE_VOIR')"),
+        new Get(security: "is_granted('ROLE_CATALOGUE_VOIR')"),
+        new Post(security: "is_granted('ROLE_CATALOGUE_CREER')"),
+        new Patch(security: "is_granted('ROLE_CATALOGUE_MODIFIER')"),
+        new Delete(security: "is_granted('ROLE_CATALOGUE_SUPPRIMER')", processor: SoftDeleteProcessor::class),
+    ],
+)]
 class Produit implements SoftDeletableInterface
 {
     use SoftDeleteTrait;
@@ -20,44 +41,56 @@ class Produit implements SoftDeletableInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['produit:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Groups(['produit:read', 'produit:write', 'contrat:read'])]
     private ?string $reference = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['produit:read', 'produit:write', 'contrat:read'])]
     private ?string $designation = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 20, enumType: TypeProduit::class)]
+    #[Groups(['produit:read', 'produit:write'])]
     private TypeProduit $type = TypeProduit::BIEN;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     #[Assert\NotBlank]
     #[Assert\PositiveOrZero]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $prixHt = '0.00';
 
     #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $tauxTva = '20.00';
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $unite = 'unité';
 
     /** Si vrai, le stock de ce produit est suivi. */
     #[ORM\Column]
+    #[Groups(['produit:read', 'produit:write'])]
     private bool $gereStock = false;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 3)]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $stockActuel = '0';
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 3, nullable: true)]
+    #[Groups(['produit:read', 'produit:write'])]
     private ?string $stockMin = null;
 
     #[ORM\Column]
+    #[Groups(['produit:read', 'produit:write'])]
     private bool $actif = true;
 
     use TimestampableTrait;
@@ -97,6 +130,7 @@ class Produit implements SoftDeletableInterface
     public function isActif(): bool { return $this->actif; }
     public function setActif(bool $actif): static { $this->actif = $actif; return $this; }
 
+    #[Groups(['produit:read'])]
     public function getPrixTtc(): float
     {
         return round((float) $this->prixHt * (1 + (float) $this->tauxTva / 100), 2);

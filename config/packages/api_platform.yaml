@@ -1,6 +1,9 @@
 api_platform:
     title: mini ERP API
     version: 1.0.0
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
     defaults:
         # Démo : on réutilise l'authentification par session du back-office.
         # En production d'une vraie API, préférer un firewall /api stateless + JWT.
