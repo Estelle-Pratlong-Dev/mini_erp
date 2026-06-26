@@ -136,7 +136,13 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - **Numérotation séquentielle sûre** : `App\Service\FactureNumeroGenerator` (verrou pessimiste sur
   `Societe`, format `prefixeFacture` + n° sur 5 chiffres). Attribuée à la création (UI et API via
   `FacturePersistProcessor`).
-- **Conversion contrat → facture** : action sur la fiche contrat (copie les lignes).
+- **Délai de paiement** (`DelaiPaiement`) → l'**échéance est calculée** (`appliquerDelaiPaiement()`),
+  et **mode de paiement** (`ModePaiement`).
+- **Conversion contrat → facture** : action sur la fiche contrat (copie les lignes, lie chaque ligne
+  à sa ligne de contrat via `LigneArticle.ligneSource`).
+- **Facturation partielle** (facture issue d'un contrat) : PU **figé**, et par ligne 3 colonnes
+  synchronisées (quantité / montant / % facturés) recalculées entre elles côté JS ; la quantité
+  facturée est la valeur stockée, le montant = quantité × PU, le % = quantité / quantité contrat.
 - **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
   templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 

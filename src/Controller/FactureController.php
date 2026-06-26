@@ -62,6 +62,7 @@ class FactureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $facture->appliquerDelaiPaiement();
             $facture->setNumero($numeroGenerator->generer());
             $em->persist($facture);
             $em->flush();
@@ -98,6 +99,7 @@ class FactureController extends AbstractController
                 ->setPrixUnitaireHt($ligneContrat->getPrixUnitaireHt())
                 ->setTauxTva($ligneContrat->getTauxTva());
             $ligne->setDesignation($ligneContrat->getDesignation());
+            $ligne->setLigneSource($ligneContrat);
             $facture->addLigne($ligne);
         }
 
@@ -124,6 +126,7 @@ class FactureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $facture->appliquerDelaiPaiement();
             $em->flush();
             $this->addFlash('success', 'Facture modifiée.');
 

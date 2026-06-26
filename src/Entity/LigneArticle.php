@@ -32,6 +32,11 @@ class LigneArticle
     #[ORM\JoinColumn(nullable: true)]
     private ?Facture $facture = null;
 
+    /** Ligne du contrat d'origine (référence) quand cette ligne facture un contrat. */
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?self $ligneSource = null;
+
     #[ORM\ManyToOne(targetEntity: Produit::class)]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Chaque ligne doit référencer un article du catalogue.')]
@@ -64,6 +69,35 @@ class LigneArticle
 
     public function getFacture(): ?Facture { return $this->facture; }
     public function setFacture(?Facture $facture): static { $this->facture = $facture; return $this; }
+
+    public function getLigneSource(): ?self { return $this->ligneSource; }
+    public function setLigneSource(?self $ligne): static { $this->ligneSource = $ligne; return $this; }
+
+    /** Quantité prévue au contrat (référence), si cette ligne provient d'un contrat. */
+    #[Groups(['facture:read'])]
+    public function getQuantiteContrat(): ?string
+    {
+        return $this->ligneSource?->getQuantite();
+    }
+
+    /** Montant HT prévu au contrat (référence), si cette ligne provient d'un contrat. */
+    #[Groups(['facture:read'])]
+    public function getMontantContrat(): ?float
+    {
+        return $this->ligneSource?->getMontantHt();
+    }
+
+    /** Pourcentage facturé par rapport à la quantité prévue au contrat. */
+    #[Groups(['facture:read'])]
+    public function getPourcentageFacture(): ?float
+    {
+        $qteContrat = (float) ($this->ligneSource?->getQuantite() ?? 0);
+        if ($qteContrat == 0.0) {
+            return null;
+        }
+
+        return round((float) $this->quantite / $qteContrat * 100, 2);
+    }
 
     public function getProduit(): ?Produit { return $this->produit; }
     public function setProduit(?Produit $produit): static

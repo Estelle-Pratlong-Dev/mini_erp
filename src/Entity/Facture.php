@@ -8,6 +8,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Enum\DelaiPaiement;
+use App\Enum\ModePaiement;
 use App\Enum\StatutFacture;
 use App\Repository\FactureRepository;
 use App\State\FacturePersistProcessor;
@@ -83,6 +85,14 @@ class Facture implements SoftDeletableInterface
     #[Groups(['facture:read', 'facture:write'])]
     private ?\DateTimeImmutable $dateEcheance = null;
 
+    #[ORM\Column(type: 'integer', nullable: true, enumType: DelaiPaiement::class)]
+    #[Groups(['facture:read', 'facture:write'])]
+    private ?DelaiPaiement $delaiPaiement = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: ModePaiement::class)]
+    #[Groups(['facture:read', 'facture:write'])]
+    private ?ModePaiement $modePaiement = null;
+
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['facture:read', 'facture:write'])]
     private ?string $notes = null;
@@ -127,6 +137,20 @@ class Facture implements SoftDeletableInterface
 
     public function getDateEcheance(): ?\DateTimeImmutable { return $this->dateEcheance; }
     public function setDateEcheance(?\DateTimeImmutable $d): static { $this->dateEcheance = $d; return $this; }
+
+    public function getDelaiPaiement(): ?DelaiPaiement { return $this->delaiPaiement; }
+    public function setDelaiPaiement(?DelaiPaiement $delai): static { $this->delaiPaiement = $delai; return $this; }
+
+    public function getModePaiement(): ?ModePaiement { return $this->modePaiement; }
+    public function setModePaiement(?ModePaiement $mode): static { $this->modePaiement = $mode; return $this; }
+
+    /** Recalcule la date d'échéance à partir de la date d'émission et du délai de paiement. */
+    public function appliquerDelaiPaiement(): void
+    {
+        if ($this->delaiPaiement !== null && $this->dateEmission !== null) {
+            $this->dateEcheance = $this->dateEmission->modify('+' . $this->delaiPaiement->value . ' days');
+        }
+    }
 
     public function getNotes(): ?string { return $this->notes; }
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }

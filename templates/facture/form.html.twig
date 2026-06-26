@@ -1,5 +1,8 @@
 {% extends 'app/layout.html.twig' %}
 
+{% set facture = form.vars.data %}
+{% set partiel = facture.contrat is not null %}
+
 {% block title %}{{ titre }} — mini ERP{% endblock %}
 {% block page_title %}{{ titre }}{% endblock %}
 
@@ -8,15 +11,93 @@
     <div class="card-body">
         {{ form_start(form) }}
         <div class="row g-3">
-            <div class="col-md-5">{{ form_row(form.projet) }}</div>
+            <div class="col-md-4">{{ form_row(form.projet) }}</div>
             <div class="col-md-4">{{ form_row(form.contact) }}</div>
-            <div class="col-md-3">{{ form_row(form.statut) }}</div>
-            <div class="col-md-4">{{ form_row(form.dateEmission) }}</div>
-            <div class="col-md-4">{{ form_row(form.dateEcheance) }}</div>
+            <div class="col-md-4">{{ form_row(form.statut) }}</div>
+            <div class="col-md-3">{{ form_row(form.dateEmission) }}</div>
+            <div class="col-md-3">{{ form_row(form.delaiPaiement) }}</div>
+            <div class="col-md-3">{{ form_row(form.modePaiement) }}</div>
         </div>
 
         <h5 class="mt-4">Lignes</h5>
-        <p class="text-muted small">Un avoir se saisit avec une quantité ou un montant négatif.</p>
+
+        {% if partiel %}
+        {# ===== Facture issue d'un contrat : facturation partielle, PU figé ===== #}
+        <p class="text-muted small">Modifiez la quantité, le montant <em>ou</em> le % à facturer : les autres se recalculent.</p>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Article</th>
+                        <th class="text-end">Qté contrat</th>
+                        <th class="text-end">PU HT</th>
+                        <th class="text-end">Montant contrat</th>
+                        <th class="text-end" style="width:12%">Qté facturée</th>
+                        <th class="text-end" style="width:14%">Montant facturé</th>
+                        <th class="text-end" style="width:10%">% facturé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for ligneForm in form.lignes %}
+                    {% set ligne = ligneForm.vars.data %}
+                    {% set pu = ligne.prixUnitaireHt %}
+                    {% set qc = ligne.quantiteContrat ?: 0 %}
+                    {% set mc = ligne.montantContrat ?: 0 %}
+                    <tr class="ligne-partielle" data-pu="{{ pu }}" data-qc="{{ qc }}" data-mc="{{ mc }}">
+                        <td>
+                            {{ ligne.designation }}
+                            <div class="d-none">
+                                {{ form_widget(ligneForm.produit) }}
+                                {{ form_widget(ligneForm.prixUnitaireHt) }}
+                                {{ form_widget(ligneForm.tauxTva) }}
+                            </div>
+                        </td>
+                        <td class="text-end text-muted">{{ qc }}</td>
+                        <td class="text-end text-muted">{{ pu|number_format(2, ',', ' ') }} €</td>
+                        <td class="text-end text-muted">{{ mc|number_format(2, ',', ' ') }} €</td>
+                        <td>{{ form_widget(ligneForm.quantite, {attr: {class: 'form-control text-end inp-qte'}}) }}</td>
+                        <td><input type="text" class="form-control text-end inp-montant" value="{{ (ligne.quantite * pu)|number_format(2, '.', '') }}"></td>
+                        <td><input type="text" class="form-control text-end inp-pct" value="{{ ligne.pourcentageFacture }}"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+        (function () {
+            document.querySelectorAll('tr.ligne-partielle').forEach(function (row) {
+                const pu = parseFloat(row.dataset.pu) || 0;
+                const qc = parseFloat(row.dataset.qc) || 0;
+                const qte = row.querySelector('.inp-qte');
+                const montant = row.querySelector('.inp-montant');
+                const pct = row.querySelector('.inp-pct');
+
+                function fmt(n) { return (Math.round(n * 100) / 100); }
+
+                qte.addEventListener('input', function () {
+                    const q = parseFloat(qte.value.replace(',', '.')) || 0;
+                    montant.value = fmt(q * pu);
+                    pct.value = qc ? fmt(q / qc * 100) : '';
+                });
+                montant.addEventListener('input', function () {
+                    const m = parseFloat(montant.value.replace(',', '.')) || 0;
+                    const q = pu ? m / pu : 0;
+                    qte.value = Math.round(q * 1000) / 1000;
+                    pct.value = qc ? fmt(q / qc * 100) : '';
+                });
+                pct.addEventListener('input', function () {
+                    const p = parseFloat(pct.value.replace(',', '.')) || 0;
+                    const q = qc * p / 100;
+                    qte.value = Math.round(q * 1000) / 1000;
+                    montant.value = fmt(q * pu);
+                });
+            });
+        })();
+        </script>
+
+        {% else %}
+        {# ===== Facture directe : saisie libre des lignes ===== #}
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead class="table-light">
@@ -25,12 +106,12 @@
                 <tbody id="lignes-body"
                        data-prototype="{{ form_widget(form.lignes.vars.prototype)|e('html_attr') }}"
                        data-index="{{ form.lignes|length }}">
-                    {% for ligne in form.lignes %}
+                    {% for ligneForm in form.lignes %}
                         <tr>
-                            <td>{{ form_widget(ligne.produit) }}{{ form_errors(ligne.produit) }}</td>
-                            <td>{{ form_widget(ligne.quantite) }}</td>
-                            <td>{{ form_widget(ligne.prixUnitaireHt) }}</td>
-                            <td>{{ form_widget(ligne.tauxTva) }}</td>
+                            <td>{{ form_widget(ligneForm.produit) }}{{ form_errors(ligneForm.produit) }}</td>
+                            <td>{{ form_widget(ligneForm.quantite) }}</td>
+                            <td>{{ form_widget(ligneForm.prixUnitaireHt) }}</td>
+                            <td>{{ form_widget(ligneForm.tauxTva) }}</td>
                             <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-ligne"><i class="bi bi-x-lg"></i></button></td>
                         </tr>
                     {% endfor %}
@@ -38,6 +119,41 @@
             </table>
         </div>
         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-ligne"><i class="bi bi-plus-lg"></i> Ajouter une ligne</button>
+
+        <script>
+        (function () {
+            const body = document.getElementById('lignes-body');
+            const addBtn = document.getElementById('btn-add-ligne');
+            function wrapPrototype(html) {
+                const tpl = document.createElement('template');
+                tpl.innerHTML = html.trim();
+                const widgets = tpl.content.querySelectorAll('input, select, textarea');
+                const tr = document.createElement('tr');
+                const cells = ['produit', 'quantite', 'prixUnitaireHt', 'tauxTva'];
+                cells.forEach(() => tr.appendChild(document.createElement('td')));
+                const td = document.createElement('td');
+                td.className = 'text-end';
+                td.innerHTML = '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-ligne"><i class="bi bi-x-lg"></i></button>';
+                tr.appendChild(td);
+                widgets.forEach((w) => {
+                    let idx = cells.findIndex((c) => (w.name || '').endsWith('[' + c + ']'));
+                    if (idx < 0) idx = 0;
+                    tr.children[idx].appendChild(w);
+                });
+                return tr;
+            }
+            addBtn.addEventListener('click', function () {
+                let index = parseInt(body.dataset.index, 10);
+                body.appendChild(wrapPrototype(body.dataset.prototype.replace(/__name__/g, index)));
+                body.dataset.index = index + 1;
+            });
+            body.addEventListener('click', function (e) {
+                const btn = e.target.closest('.btn-remove-ligne');
+                if (btn) { btn.closest('tr').remove(); }
+            });
+        })();
+        </script>
+        {% endif %}
 
         <div class="mt-3">{{ form_row(form.notes) }}</div>
 
@@ -48,42 +164,4 @@
         {{ form_end(form) }}
     </div>
 </div>
-
-<script>
-(function () {
-    const body = document.getElementById('lignes-body');
-    const addBtn = document.getElementById('btn-add-ligne');
-
-    function wrapPrototype(html) {
-        const tpl = document.createElement('template');
-        tpl.innerHTML = html.trim();
-        const widgets = tpl.content.querySelectorAll('input, select, textarea');
-        const tr = document.createElement('tr');
-        const cells = ['produit', 'quantite', 'prixUnitaireHt', 'tauxTva'];
-        cells.forEach(() => tr.appendChild(document.createElement('td')));
-        const tdActions = document.createElement('td');
-        tdActions.className = 'text-end';
-        tdActions.innerHTML = '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-ligne"><i class="bi bi-x-lg"></i></button>';
-        tr.appendChild(tdActions);
-        widgets.forEach((w) => {
-            let idx = cells.findIndex((c) => (w.name || '').endsWith('[' + c + ']'));
-            if (idx < 0) idx = 0;
-            tr.children[idx].appendChild(w);
-        });
-        return tr;
-    }
-
-    addBtn.addEventListener('click', function () {
-        let index = parseInt(body.dataset.index, 10);
-        const html = body.dataset.prototype.replace(/__name__/g, index);
-        body.appendChild(wrapPrototype(html));
-        body.dataset.index = index + 1;
-    });
-
-    body.addEventListener('click', function (e) {
-        const btn = e.target.closest('.btn-remove-ligne');
-        if (btn) { btn.closest('tr').remove(); }
-    });
-})();
-</script>
 {% endblock %}
