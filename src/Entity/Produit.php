@@ -19,7 +19,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_PRODUIT_REFERENCE', fields: ['reference'])]
+// Unicité gérée au niveau applicatif (UniqueEntity) : grâce au filtre soft-delete,
+// elle ne s'applique qu'aux produits non supprimés → une référence supprimée est réutilisable.
 #[UniqueEntity(fields: ['reference'], message: 'Cette référence existe déjà.')]
 #[ApiResource(
     shortName: 'Produit',

@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Le rôle de code "ADMIN" est un super-administrateur (accès total).
  */
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_ROLE_CODE', fields: ['code'])]
+// Unicité applicative (UniqueEntity) + filtre soft-delete : unique parmi les rôles actifs.
 #[UniqueEntity(fields: ['code'], message: 'Ce code de rôle existe déjà.')]
 class Role implements SoftDeletableInterface
 {

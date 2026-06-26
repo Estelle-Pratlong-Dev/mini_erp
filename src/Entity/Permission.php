@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Les permissions sont reliées aux rôles (Many-to-Many).
  */
 #[ORM\Entity(repositoryClass: PermissionRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_PERMISSION_CODE', fields: ['code'])]
+// Unicité applicative (UniqueEntity) + filtre soft-delete : unique parmi les permissions actives.
 #[UniqueEntity(fields: ['code'], message: 'Ce code de permission existe déjà.')]
 class Permission implements SoftDeletableInterface
 {
