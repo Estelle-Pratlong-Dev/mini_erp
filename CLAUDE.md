@@ -69,7 +69,7 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ### Suppression logique (soft delete)
 - Les entités supprimables implémentent `App\Entity\SoftDeletableInterface` et utilisent
   `App\Trait\SoftDeleteTrait` (**booléen `supprime`**). Concernées : User, Role, Permission,
-  Contact, Produit, Projet, Contrat, PieceJointe.
+  Contact, Produit, Projet, Contrat, Facture, PieceJointe.
 - La **date et l'auteur** de la suppression ne sont pas stockés à part : une suppression est une
   modification, donc `modifieLe` / `modifiePar` (audit) sont mis à jour automatiquement au flush.
 - Le filtre Doctrine `App\Doctrine\SoftDeleteFilter` (activé dans `doctrine.yaml`) exclut
@@ -83,7 +83,7 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ### Audit
 - `App\Trait\TimestampableTrait` : champs **en français** `creeLe` / `creePar` / `modifieLe` /
   `modifiePar` (colonnes `cree_le`, `cree_par_id`, `modifie_le`, `modifie_par_id`).
-- Présent sur **toutes les entités** (Contact, Produit, Projet, Contrat, LigneArticle,
+- Présent sur **toutes les entités** (Contact, Produit, Projet, Contrat, Facture, LigneArticle,
   PieceJointe, User, Societe, Module, Role, Permission).
 - Remplissage **automatique** par `App\EventListener\TimestampableListener`
   (Doctrine prePersist/preUpdate). Pas besoin de le faire dans les contrôleurs.
@@ -91,8 +91,10 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ### API REST (API Platform)
 - Exposition **déclarative** via l'attribut `#[ApiResource]` **sur l'entité** (pas de contrôleur).
 - Entités exposées : **Contact** (`/api/contacts`), **Produit** (`/api/produits`),
-  **Projet** (`/api/projets`), **Contrat** (`/api/contrats`, avec ses **lignes imbriquées** en
-  lecture/écriture + totaux calculés). Chaque ressource a GET liste/détail, POST, PATCH, DELETE.
+  **Projet** (`/api/projets`), **Contrat** (`/api/contrats`), **Facture** (`/api/factures`) —
+  Contrat et Facture avec leurs **lignes imbriquées** (lecture/écriture) + totaux calculés.
+  Chaque ressource a GET liste/détail, POST, PATCH, DELETE. La création de facture via l'API
+  passe par `FacturePersistProcessor` (attribution du numéro).
 - Relations exposées en **IRI** (ex. `projet: "/api/projets/4"`) ; formats `jsonld` et `json`.
 - **Groupes de sérialisation** (`#[Groups(['contact:read'/'contact:write'])]`) pour ne pas exposer
   l'audit ni `supprime`.
@@ -117,20 +119,30 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   panneaux via `FormField::addFieldset()` (pas `addPanel`).
 
 ## Pièces jointes (Phase 2)
-- Entité `PieceJointe` rattachable à un `Projet` et/ou un `Contrat` (relation `Facture` en Phase 3).
+- Entité `PieceJointe` rattachable à un `Projet`, un `Contrat` et/ou une `Facture`.
 - Fichiers stockés hors web dans `var/uploads/pieces/` (gitignoré via `var/`), servis par
   `PieceJointeController` (download sécurisé `ROLE_USER`). Upload manuel (pas de VichUploader).
 
 ## Lignes de documents
 - `LigneArticle` (table `ligne_article`) = les **lignes d'articles** d'un document commercial.
-  Partagée : pour l'instant rattachée au `Contrat` (FK `facture` ajoutée en Phase 3).
+  Partagée entre `Contrat` et `Facture` (un seul parent renseigné par ligne).
   À ne pas confondre avec `PieceJointe` (fichiers joints) ni le PDF imprimable (généré à la volée).
 - Saisie dynamique des lignes via `CollectionType` + JS vanilla (prototype) dans
-  `templates/contrat/form.html.twig` — pas de build front.
+  les formulaires contrat/facture — pas de build front.
+
+## Facturation (Phase 3)
+- `Facture` rattachée à un `Projet` (jamais orpheline), `Contact` optionnel, `Contrat` d'origine opt.
+- **Avoir = facture à montant négatif** (`isAvoir()` / `getLibelleType()`), pas de type distinct.
+- **Numérotation séquentielle sûre** : `App\Service\FactureNumeroGenerator` (verrou pessimiste sur
+  `Societe`, format `prefixeFacture` + n° sur 5 chiffres). Attribuée à la création (UI et API via
+  `FacturePersistProcessor`).
+- **Conversion contrat → facture** : action sur la fiche contrat (copie les lignes).
+- **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
+  templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 
 ## État (phases livrées)
 - **Phase 0** : socle (auth, Société, Modules, RBAC, EasyAdmin admin).
 - **Phase 1** : Contacts, Catalogue (Produits).
-- **Phase 2** : Projets, Contrats/Devis (lignes + totaux HT/TVA/TTC), Pièces jointes.
-- À venir : Facturation (PDF, avoir = négatif), Vente directe, Stock+Commandes,
-  Dépenses+Statistiques, Compta/Factur-X.
+- **Phase 2** : Projets, Contrats/Devis (lignes + totaux), Pièces jointes.
+- **Phase 3** : Facturation (numérotation auto, avoir, conversion contrat→facture, PDF), API + tests.
+- À venir : Vente directe, Stock+Commandes, Dépenses+Statistiques, Compta/Factur-X.

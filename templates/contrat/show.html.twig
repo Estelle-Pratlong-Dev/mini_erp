@@ -3,6 +3,13 @@
 {% block title %}{{ contrat.type.libelle }} #{{ contrat.id }} — mini ERP{% endblock %}
 {% block page_title %}{{ contrat.type.libelle }} {{ contrat.reference ? '— ' ~ contrat.reference : '#' ~ contrat.id }}{% endblock %}
 {% block page_actions %}
+    <a href="{{ path('app_contrat_pdf', {id: contrat.id}) }}" class="btn btn-outline-secondary" target="_blank"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+    {% if module_actif('FACTURATION') and is_granted('ROLE_FACTURATION_CREER') %}
+        <form method="post" action="{{ path('app_facture_from_contrat', {id: contrat.id}) }}" class="d-inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('facturer' ~ contrat.id) }}">
+            <button class="btn btn-success"><i class="bi bi-receipt"></i> Convertir en facture</button>
+        </form>
+    {% endif %}
     {% if is_granted('ROLE_CONTRATS_MODIFIER') %}
         <a href="{{ path('app_contrat_edit', {id: contrat.id}) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Modifier</a>
     {% endif %}

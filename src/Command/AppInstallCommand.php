@@ -44,6 +44,7 @@ class AppInstallCommand extends Command
         CodeModule::CATALOGUE->value,
         CodeModule::PROJETS->value,
         CodeModule::CONTRATS->value,
+        CodeModule::FACTURATION->value,
     ];
 
     public function __construct(

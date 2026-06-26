@@ -1,0 +1,63 @@
+{% extends 'app/layout.html.twig' %}
+
+{% block title %}{{ facture.numero }} — mini ERP{% endblock %}
+{% block page_title %}{{ facture.libelleType }} {{ facture.numero }}{% endblock %}
+{% block page_actions %}
+    <a href="{{ path('app_facture_pdf', {id: facture.id}) }}" class="btn btn-outline-secondary" target="_blank"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+    {% if is_granted('ROLE_FACTURATION_MODIFIER') %}
+        <a href="{{ path('app_facture_edit', {id: facture.id}) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Modifier</a>
+    {% endif %}
+    {% if is_granted('ROLE_FACTURATION_SUPPRIMER') %}
+        <form method="post" action="{{ path('app_facture_delete', {id: facture.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette facture ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ facture.id) }}">
+            <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Supprimer</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Client</dt>
+            <dd class="col-sm-9">{{ facture.contact ?: 'Comptant' }}</dd>
+            <dt class="col-sm-3">Projet</dt>
+            <dd class="col-sm-9"><a href="{{ path('app_projet_show', {id: facture.projet.id}) }}">{{ facture.projet.nom }}</a></dd>
+            {% if facture.contrat %}
+                <dt class="col-sm-3">Issue du contrat</dt>
+                <dd class="col-sm-9"><a href="{{ path('app_contrat_show', {id: facture.contrat.id}) }}">{{ facture.contrat }}</a></dd>
+            {% endif %}
+            <dt class="col-sm-3">Statut</dt>
+            <dd class="col-sm-9"><span class="badge text-bg-{{ facture.statut.couleur }}">{{ facture.statut.libelle }}</span></dd>
+            <dt class="col-sm-3">Émise le</dt>
+            <dd class="col-sm-9">{{ facture.dateEmission|date('d/m/Y') }}{% if facture.dateEcheance %} · échéance {{ facture.dateEcheance|date('d/m/Y') }}{% endif %}</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead class="table-light"><tr><th>Désignation</th><th class="text-end">Qté</th><th class="text-end">PU HT</th><th class="text-end">TVA</th><th class="text-end">Montant HT</th></tr></thead>
+            <tbody>
+            {% for ligne in facture.lignes %}
+                <tr>
+                    <td>{{ ligne.designation }}</td>
+                    <td class="text-end">{{ ligne.quantite }}</td>
+                    <td class="text-end">{{ ligne.prixUnitaireHt|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end">{{ ligne.tauxTva }} %</td>
+                    <td class="text-end">{{ ligne.montantHt|number_format(2, ',', ' ') }} €</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><th colspan="4" class="text-end">Total HT</th><th class="text-end">{{ facture.totalHt|number_format(2, ',', ' ') }} €</th></tr>
+                <tr><th colspan="4" class="text-end">TVA</th><th class="text-end">{{ facture.totalTva|number_format(2, ',', ' ') }} €</th></tr>
+                <tr class="table-light"><th colspan="4" class="text-end">Total TTC</th><th class="text-end">{{ facture.totalTtc|number_format(2, ',', ' ') }} €</th></tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% include 'piece/_section.html.twig' with {pieces: facture.piecesJointes, cible: 'facture', cible_id: facture.id} %}
+{% endblock %}

@@ -43,6 +43,10 @@ class PieceJointe implements SoftDeletableInterface
     #[ORM\JoinColumn(nullable: true)]
     private ?Contrat $contrat = null;
 
+    #[ORM\ManyToOne(targetEntity: Facture::class, inversedBy: 'piecesJointes')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Facture $facture = null;
+
     public function getId(): ?int { return $this->id; }
 
     public function getFichier(): ?string { return $this->fichier; }
@@ -62,6 +66,9 @@ class PieceJointe implements SoftDeletableInterface
 
     public function getContrat(): ?Contrat { return $this->contrat; }
     public function setContrat(?Contrat $contrat): static { $this->contrat = $contrat; return $this; }
+
+    public function getFacture(): ?Facture { return $this->facture; }
+    public function setFacture(?Facture $facture): static { $this->facture = $facture; return $this; }
 
     public function __toString(): string
     {

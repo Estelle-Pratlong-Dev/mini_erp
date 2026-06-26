@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Contrat;
+use App\Entity\Facture;
 use App\Entity\PieceJointe;
 use App\Entity\Projet;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,6 +73,11 @@ class PieceJointeController extends AbstractController
             if ($contrat) {
                 $piece->setContrat($contrat);
             }
+        } elseif ($cible === 'facture' && $cibleId) {
+            $facture = $em->getRepository(Facture::class)->find($cibleId);
+            if ($facture) {
+                $piece->setFacture($facture);
+            }
         }
 
         $em->persist($piece);
@@ -105,8 +111,16 @@ class PieceJointeController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $cible = $piece->getContrat() ? 'contrat' : 'projet';
-        $cibleId = $piece->getContrat()?->getId() ?? $piece->getProjet()?->getId() ?? 0;
+        if ($piece->getFacture()) {
+            $cible = 'facture';
+            $cibleId = $piece->getFacture()->getId();
+        } elseif ($piece->getContrat()) {
+            $cible = 'contrat';
+            $cibleId = $piece->getContrat()->getId();
+        } else {
+            $cible = 'projet';
+            $cibleId = $piece->getProjet()?->getId() ?? 0;
+        }
 
         // Suppression logique : on conserve le fichier et la ligne en base.
         $piece->setSupprime(true);
@@ -118,6 +132,9 @@ class PieceJointeController extends AbstractController
 
     private function redirectToReferer(Request $request, ?string $cible, int $cibleId): Response
     {
+        if ($cible === 'facture' && $cibleId) {
+            return $this->redirectToRoute('app_facture_show', ['id' => $cibleId]);
+        }
         if ($cible === 'contrat' && $cibleId) {
             return $this->redirectToRoute('app_contrat_show', ['id' => $cibleId]);
         }

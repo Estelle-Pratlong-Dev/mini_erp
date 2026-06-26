@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+    * { font-family: 'DejaVu Sans', sans-serif; }
+    body { font-size: 12px; color: #1f2937; }
+    .row { width: 100%; }
+    .row:after { content: ""; display: table; clear: both; }
+    .col-left { float: left; width: 50%; }
+    .col-right { float: right; width: 45%; text-align: right; }
+    h1 { font-size: 22px; margin: 0 0 4px; color: #4f46e5; }
+    .muted { color: #6b7280; }
+    .box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; }
+    table.lignes { width: 100%; border-collapse: collapse; margin-top: 18px; }
+    table.lignes th { background: #f3f4f6; text-align: left; padding: 6px 8px; font-size: 11px; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+    table.lignes td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; }
+    .text-end { text-align: right; }
+    table.totaux { width: 40%; float: right; margin-top: 10px; border-collapse: collapse; }
+    table.totaux td { padding: 4px 8px; }
+    table.totaux tr.ttc td { font-weight: bold; border-top: 2px solid #4f46e5; font-size: 14px; }
+    .footer { margin-top: 30px; font-size: 10px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="row">
+    <div class="col-left">
+        <strong style="font-size:15px;">{{ societe ? societe.raisonSociale : 'Ma société' }}</strong><br>
+        {% if societe %}
+            {{ societe.adresse }}<br>
+            {{ societe.codePostal }} {{ societe.ville }}<br>
+            {% if societe.siret %}SIRET : {{ societe.siret }}<br>{% endif %}
+            {% if societe.numTva %}TVA : {{ societe.numTva }}{% endif %}
+        {% endif %}
+    </div>
+    <div class="col-right">
+        <h1>{{ contrat.type.libelle|upper }}</h1>
+        {% if contrat.reference %}<div><strong>{{ contrat.reference }}</strong></div>{% endif %}
+        <div class="muted">Émis le {{ contrat.dateEmission|date('d/m/Y') }}</div>
+        {% if contrat.dateValidite %}<div class="muted">Valable jusqu'au {{ contrat.dateValidite|date('d/m/Y') }}</div>{% endif %}
+    </div>
+</div>
+
+<div style="margin-top: 25px;" class="row">
+    <div class="col-right">
+        <div class="box" style="display:inline-block; text-align:left; min-width:45%;">
+            <div class="muted" style="font-size:10px; text-transform:uppercase;">Client</div>
+            {% set client = contrat.projet.contact %}
+            {% if client %}
+                <strong>{{ client }}</strong><br>
+                {{ client.adresse }}<br>
+                {{ client.codePostal }} {{ client.ville }}
+            {% else %}
+                <strong>{{ contrat.projet.nom }}</strong>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<table class="lignes">
+    <thead>
+        <tr>
+            <th>Désignation</th><th class="text-end">Qté</th><th class="text-end">PU HT</th><th class="text-end">TVA</th><th class="text-end">Montant HT</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ligne in contrat.lignes %}
+        <tr>
+            <td>{{ ligne.designation }}</td>
+            <td class="text-end">{{ ligne.quantite }}</td>
+            <td class="text-end">{{ ligne.prixUnitaireHt|number_format(2, ',', ' ') }} €</td>
+            <td class="text-end">{{ ligne.tauxTva }} %</td>
+            <td class="text-end">{{ ligne.montantHt|number_format(2, ',', ' ') }} €</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="totaux">
+    <tr><td>Total HT</td><td class="text-end">{{ contrat.totalHt|number_format(2, ',', ' ') }} €</td></tr>
+    <tr><td>TVA</td><td class="text-end">{{ contrat.totalTva|number_format(2, ',', ' ') }} €</td></tr>
+    <tr class="ttc"><td>Total TTC</td><td class="text-end">{{ contrat.totalTtc|number_format(2, ',', ' ') }} €</td></tr>
+</table>
+
+<div style="clear:both;"></div>
+
+{% if contrat.notes %}<p style="margin-top:25px;"><strong>Notes :</strong> {{ contrat.notes }}</p>{% endif %}
+
+<div class="footer">
+    {% if societe and societe.conditionsPaiement %}<div>{{ societe.conditionsPaiement }}</div>{% endif %}
+    {% if societe and societe.mentionsLegales %}<div>{{ societe.mentionsLegales }}</div>{% endif %}
+</div>
+
+</body>
+</html>

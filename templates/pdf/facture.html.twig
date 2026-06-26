@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<style>
+    * { font-family: 'DejaVu Sans', sans-serif; }
+    body { font-size: 12px; color: #1f2937; }
+    .row { width: 100%; }
+    .row:after { content: ""; display: table; clear: both; }
+    .col-left { float: left; width: 50%; }
+    .col-right { float: right; width: 45%; text-align: right; }
+    h1 { font-size: 22px; margin: 0 0 4px; color: #4f46e5; }
+    .muted { color: #6b7280; }
+    .box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; }
+    table.lignes { width: 100%; border-collapse: collapse; margin-top: 18px; }
+    table.lignes th { background: #f3f4f6; text-align: left; padding: 6px 8px; font-size: 11px; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+    table.lignes td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; }
+    .text-end { text-align: right; }
+    table.totaux { width: 40%; float: right; margin-top: 10px; border-collapse: collapse; }
+    table.totaux td { padding: 4px 8px; }
+    table.totaux tr.ttc td { font-weight: bold; border-top: 2px solid #4f46e5; font-size: 14px; }
+    .footer { margin-top: 30px; font-size: 10px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="row">
+    <div class="col-left">
+        <strong style="font-size:15px;">{{ societe ? societe.raisonSociale : 'Ma société' }}</strong><br>
+        {% if societe %}
+            {{ societe.formeJuridique }}{% if societe.capital %} — Capital {{ societe.capital }}{% endif %}<br>
+            {{ societe.adresse }}<br>
+            {{ societe.codePostal }} {{ societe.ville }}<br>
+            {% if societe.telephone %}Tél. {{ societe.telephone }}<br>{% endif %}
+            {% if societe.email %}{{ societe.email }}<br>{% endif %}
+            {% if societe.siret %}SIRET : {{ societe.siret }}<br>{% endif %}
+            {% if societe.numTva %}TVA : {{ societe.numTva }}{% endif %}
+        {% endif %}
+    </div>
+    <div class="col-right">
+        <h1>{{ facture.libelleType|upper }}</h1>
+        <div><strong>{{ facture.numero }}</strong></div>
+        <div class="muted">Émise le {{ facture.dateEmission|date('d/m/Y') }}</div>
+        {% if facture.dateEcheance %}<div class="muted">Échéance : {{ facture.dateEcheance|date('d/m/Y') }}</div>{% endif %}
+        <div class="muted">Statut : {{ facture.statut.libelle }}</div>
+    </div>
+</div>
+
+<div style="margin-top: 25px;" class="row">
+    <div class="col-right">
+        <div class="box" style="display:inline-block; text-align:left; min-width:45%;">
+            <div class="muted" style="font-size:10px; text-transform:uppercase;">Client</div>
+            {% if facture.contact %}
+                <strong>{{ facture.contact }}</strong><br>
+                {{ facture.contact.adresse }}<br>
+                {{ facture.contact.codePostal }} {{ facture.contact.ville }}<br>
+                {% if facture.contact.siret %}SIRET : {{ facture.contact.siret }}{% endif %}
+            {% else %}
+                <strong>Comptant</strong>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<table class="lignes">
+    <thead>
+        <tr>
+            <th>Désignation</th>
+            <th class="text-end">Qté</th>
+            <th class="text-end">PU HT</th>
+            <th class="text-end">TVA</th>
+            <th class="text-end">Montant HT</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ligne in facture.lignes %}
+        <tr>
+            <td>{{ ligne.designation }}</td>
+            <td class="text-end">{{ ligne.quantite }}</td>
+            <td class="text-end">{{ ligne.prixUnitaireHt|number_format(2, ',', ' ') }} €</td>
+            <td class="text-end">{{ ligne.tauxTva }} %</td>
+            <td class="text-end">{{ ligne.montantHt|number_format(2, ',', ' ') }} €</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="totaux">
+    <tr><td>Total HT</td><td class="text-end">{{ facture.totalHt|number_format(2, ',', ' ') }} €</td></tr>
+    <tr><td>TVA</td><td class="text-end">{{ facture.totalTva|number_format(2, ',', ' ') }} €</td></tr>
+    <tr class="ttc"><td>Total TTC</td><td class="text-end">{{ facture.totalTtc|number_format(2, ',', ' ') }} €</td></tr>
+</table>
+
+<div style="clear:both;"></div>
+
+{% if facture.notes %}<p style="margin-top:25px;"><strong>Notes :</strong> {{ facture.notes }}</p>{% endif %}
+
+<div class="footer">
+    {% if societe and societe.conditionsPaiement %}<div>{{ societe.conditionsPaiement }}</div>{% endif %}
+    {% if societe and (societe.iban or societe.bic) %}<div>Règlement : IBAN {{ societe.iban }} — BIC {{ societe.bic }}</div>{% endif %}
+    {% if societe and societe.mentionsLegales %}<div>{{ societe.mentionsLegales }}</div>{% endif %}
+</div>
+
+</body>
+</html>

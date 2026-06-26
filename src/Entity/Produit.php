@@ -47,12 +47,12 @@ class Produit implements SoftDeletableInterface
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    #[Groups(['produit:read', 'produit:write', 'contrat:read'])]
+    #[Groups(['produit:read', 'produit:write', 'contrat:read', 'facture:read'])]
     private ?string $reference = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups(['produit:read', 'produit:write', 'contrat:read'])]
+    #[Groups(['produit:read', 'produit:write', 'contrat:read', 'facture:read'])]
     private ?string $designation = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

@@ -10,6 +10,8 @@ use App\Enum\CodeModule;
 use App\Form\ContratType;
 use App\Repository\ContratRepository;
 use App\Repository\ProduitRepository;
+use App\Repository\SocieteRepository;
+use App\Service\PdfGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -83,6 +85,16 @@ class ContratController extends AbstractController
     public function show(Contrat $contrat): Response
     {
         return $this->render('contrat/show.html.twig', ['contrat' => $contrat]);
+    }
+
+    #[Route('/{id}/pdf', name: 'app_contrat_pdf', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_CONTRATS_VOIR')]
+    public function pdf(Contrat $contrat, PdfGenerator $pdf, SocieteRepository $societeRepository): Response
+    {
+        return $pdf->reponseDepuisTemplate('pdf/contrat.html.twig', [
+            'contrat' => $contrat,
+            'societe' => $societeRepository->getSociete(),
+        ], ($contrat->getReference() ?: 'document') . '.pdf');
     }
 
     #[Route('/{id}/modifier', name: 'app_contrat_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]

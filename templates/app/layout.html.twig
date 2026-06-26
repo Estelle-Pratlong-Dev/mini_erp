@@ -46,6 +46,14 @@
                 </a>
             </li>
             {% endif %}
+
+            {% if module_actif('FACTURATION') %}
+            <li>
+                <a href="{{ path('app_facture_index') }}" class="nav-link text-white {{ app.request.attributes.get('_route') starts with 'app_facture' ? 'active' : '' }}">
+                    <i class="bi bi-receipt me-2"></i>Factures
+                </a>
+            </li>
+            {% endif %}
         </ul>
         <hr>
         <div class="dropdown">
