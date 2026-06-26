@@ -93,6 +93,16 @@ class Facture implements SoftDeletableInterface
     #[Groups(['facture:read', 'facture:write'])]
     private ?ModePaiement $modePaiement = null;
 
+    /** Snapshot (figé à la création) du HT déjà facturé sur le contrat par les factures précédentes. */
+    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, nullable: true)]
+    #[Groups(['facture:read'])]
+    private ?string $montantDejaFactureHt = null;
+
+    /** Snapshot (figé) de la TVA déjà facturée sur le contrat par les factures précédentes. */
+    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, nullable: true)]
+    #[Groups(['facture:read'])]
+    private ?string $montantDejaFactureTva = null;
+
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['facture:read', 'facture:write'])]
     private ?string $notes = null;
@@ -143,6 +153,18 @@ class Facture implements SoftDeletableInterface
 
     public function getModePaiement(): ?ModePaiement { return $this->modePaiement; }
     public function setModePaiement(?ModePaiement $mode): static { $this->modePaiement = $mode; return $this; }
+
+    public function getMontantDejaFactureHt(): ?string { return $this->montantDejaFactureHt; }
+    public function setMontantDejaFactureHt(?string $v): static { $this->montantDejaFactureHt = $v; return $this; }
+
+    public function getMontantDejaFactureTva(): ?string { return $this->montantDejaFactureTva; }
+    public function setMontantDejaFactureTva(?string $v): static { $this->montantDejaFactureTva = $v; return $this; }
+
+    /** Vrai s'il y a un montant déjà facturé à déduire (facturation à l'avancement). */
+    public function aDeduction(): bool
+    {
+        return $this->montantDejaFactureHt !== null && (float) $this->montantDejaFactureHt != 0.0;
+    }
 
     /** Recalcule la date d'échéance à partir de la date d'émission et du délai de paiement. */
     public function appliquerDelaiPaiement(): void
@@ -219,6 +241,25 @@ class Facture implements SoftDeletableInterface
     public function getTotalTtc(): float
     {
         return round($this->getTotalHt() + $this->getTotalTva(), 2);
+    }
+
+    /** HT net à payer = total des lignes − HT déjà facturé (avancement). */
+    #[Groups(['facture:read'])]
+    public function getNetHt(): float
+    {
+        return round($this->getTotalHt() - (float) ($this->montantDejaFactureHt ?? 0), 2);
+    }
+
+    #[Groups(['facture:read'])]
+    public function getNetTva(): float
+    {
+        return round($this->getTotalTva() - (float) ($this->montantDejaFactureTva ?? 0), 2);
+    }
+
+    #[Groups(['facture:read'])]
+    public function getNetTtc(): float
+    {
+        return round($this->getNetHt() + $this->getNetTva(), 2);
     }
 
     /** Un avoir est une facture dont le total est négatif. */

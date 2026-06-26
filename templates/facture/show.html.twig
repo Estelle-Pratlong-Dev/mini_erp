@@ -58,9 +58,14 @@
             {% endfor %}
             </tbody>
             <tfoot>
-                <tr><th colspan="6" class="text-end">Total HT</th><th class="text-end">{{ facture.totalHt|number_format(2, ',', ' ') }} €</th></tr>
+                <tr><th colspan="6" class="text-end">Total HT{{ facture.aDeduction ? ' (cumulé)' : '' }}</th><th class="text-end">{{ facture.totalHt|number_format(2, ',', ' ') }} €</th></tr>
                 <tr><th colspan="6" class="text-end">TVA</th><th class="text-end">{{ facture.totalTva|number_format(2, ',', ' ') }} €</th></tr>
-                <tr class="table-light"><th colspan="6" class="text-end">Total TTC</th><th class="text-end">{{ facture.totalTtc|number_format(2, ',', ' ') }} €</th></tr>
+                {% if facture.aDeduction %}
+                    <tr class="text-danger"><th colspan="6" class="text-end fw-normal">Déjà facturé (factures précédentes) HT</th><th class="text-end">− {{ facture.montantDejaFactureHt|number_format(2, ',', ' ') }} €</th></tr>
+                    <tr class="text-danger"><th colspan="6" class="text-end fw-normal">Déjà facturé — TVA</th><th class="text-end">− {{ facture.montantDejaFactureTva|number_format(2, ',', ' ') }} €</th></tr>
+                    <tr><th colspan="6" class="text-end">Net HT à payer</th><th class="text-end">{{ facture.netHt|number_format(2, ',', ' ') }} €</th></tr>
+                {% endif %}
+                <tr class="table-light"><th colspan="6" class="text-end">{{ facture.aDeduction ? 'Net TTC à payer' : 'Total TTC' }}</th><th class="text-end">{{ facture.netTtc|number_format(2, ',', ' ') }} €</th></tr>
             </tfoot>
         </table>
     </div>

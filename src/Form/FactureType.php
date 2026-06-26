@@ -64,15 +64,21 @@ class FactureType extends AbstractType
             ->add('lignes', CollectionType::class, [
                 'entry_type' => LigneArticleType::class,
                 'label' => false,
-                'allow_add' => true,
-                'allow_delete' => true,
+                'allow_add' => $options['lignes_modifiables'],
+                'allow_delete' => $options['lignes_modifiables'],
                 'by_reference' => false,
                 'prototype' => true,
+                // Si ce n'est pas la dernière facture du contrat, les lignes sont verrouillées.
+                'disabled' => !$options['lignes_modifiables'],
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Facture::class]);
+        $resolver->setDefaults([
+            'data_class' => Facture::class,
+            'lignes_modifiables' => true,
+        ]);
+        $resolver->setAllowedTypes('lignes_modifiables', 'bool');
     }
 }

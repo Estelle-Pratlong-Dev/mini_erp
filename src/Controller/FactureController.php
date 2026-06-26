@@ -81,6 +81,7 @@ class FactureController extends AbstractController
         Contrat $contrat,
         EntityManagerInterface $em,
         FactureNumeroGenerator $numeroGenerator,
+        FactureRepository $factureRepository,
     ): Response {
         if (!$this->isCsrfTokenValid('facturer' . $contrat->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -91,6 +92,18 @@ class FactureController extends AbstractController
             ->setContact($contrat->getProjet()?->getContact())
             ->setContrat($contrat)
             ->setNotes($contrat->getNotes());
+
+        // Snapshot du déjà-facturé (facturation à l'avancement) figé à la création.
+        $dejaHt = 0.0;
+        $dejaTva = 0.0;
+        foreach ($factureRepository->duContrat($contrat) as $factureExistante) {
+            $dejaHt += $factureExistante->getTotalHt();
+            $dejaTva += $factureExistante->getTotalTva();
+        }
+        if ($dejaHt != 0.0 || $dejaTva != 0.0) {
+            $facture->setMontantDejaFactureHt(number_format($dejaHt, 2, '.', ''));
+            $facture->setMontantDejaFactureTva(number_format($dejaTva, 2, '.', ''));
+        }
 
         foreach ($contrat->getLignes() as $ligneContrat) {
             $ligne = (new LigneArticle())
@@ -120,9 +133,12 @@ class FactureController extends AbstractController
 
     #[Route('/{id}/modifier', name: 'app_facture_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_FACTURATION_MODIFIER')]
-    public function edit(Request $request, Facture $facture, EntityManagerInterface $em): Response
+    public function edit(Request $request, Facture $facture, EntityManagerInterface $em, FactureRepository $factureRepository): Response
     {
-        $form = $this->createForm(FactureType::class, $facture);
+        // Seuls les montants/lignes de la dernière facture du contrat sont modifiables.
+        $lignesModifiables = $factureRepository->estDerniere($facture);
+
+        $form = $this->createForm(FactureType::class, $facture, ['lignes_modifiables' => $lignesModifiables]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -133,7 +149,11 @@ class FactureController extends AbstractController
             return $this->redirectToRoute('app_facture_show', ['id' => $facture->getId()]);
         }
 
-        return $this->render('facture/form.html.twig', ['form' => $form, 'titre' => 'Modifier la facture']);
+        return $this->render('facture/form.html.twig', [
+            'form' => $form,
+            'titre' => 'Modifier la facture',
+            'lignesModifiables' => $lignesModifiables,
+        ]);
     }
 
     #[Route('/{id}/pdf', name: 'app_facture_pdf', methods: ['GET'], requirements: ['id' => '\d+'])]

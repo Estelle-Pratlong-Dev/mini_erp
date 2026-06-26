@@ -36,6 +36,31 @@ class FacturationPartielleTest extends TestCase
         self::assertNull($ligne->getQuantiteContrat());
     }
 
+    public function testDeductionDejaFactureDonneLeNet(): void
+    {
+        $facture = new Facture();
+        $facture->addLigne(
+            (new LigneArticle())->setQuantite('10')->setPrixUnitaireHt('18.50')->setTauxTva('5.5')
+        ); // 185.00 HT, 10.18 TVA
+        $facture->setMontantDejaFactureHt('100.00')->setMontantDejaFactureTva('5.50');
+
+        self::assertTrue($facture->aDeduction());
+        self::assertSame(185.00, $facture->getTotalHt());
+        self::assertSame(85.00, $facture->getNetHt());
+        self::assertSame(89.68, $facture->getNetTtc());
+    }
+
+    public function testSansDeductionLeNetEgaleLeTotal(): void
+    {
+        $facture = new Facture();
+        $facture->addLigne(
+            (new LigneArticle())->setQuantite('2')->setPrixUnitaireHt('18.50')->setTauxTva('5.5')
+        );
+
+        self::assertFalse($facture->aDeduction());
+        self::assertSame($facture->getTotalTtc(), $facture->getNetTtc());
+    }
+
     public function testEcheanceCalculeeSelonLeDelai(): void
     {
         $facture = (new Facture())

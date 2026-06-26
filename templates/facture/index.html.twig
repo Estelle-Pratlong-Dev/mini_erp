@@ -24,7 +24,7 @@
                     <td>{{ facture.projet.nom }}</td>
                     <td>{{ facture.dateEmission|date('d/m/Y') }}</td>
                     <td><span class="badge text-bg-{{ facture.statut.couleur }}">{{ facture.statut.libelle }}</span></td>
-                    <td class="text-end">{{ facture.totalTtc|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end">{{ facture.netTtc|number_format(2, ',', ' ') }} €</td>
                     <td class="text-end">
                         <a href="{{ path('app_facture_pdf', {id: facture.id}) }}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="bi bi-file-earmark-pdf"></i></a>
                         <a href="{{ path('app_facture_show', {id: facture.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>

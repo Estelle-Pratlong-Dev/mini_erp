@@ -143,6 +143,13 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - **Facturation partielle** (facture issue d'un contrat) : PU **figé**, et par ligne 3 colonnes
   synchronisées (quantité / montant / % facturés) recalculées entre elles côté JS ; la quantité
   facturée est la valeur stockée, le montant = quantité × PU, le % = quantité / quantité contrat.
+  Champ **« % global »** pour appliquer un pourcentage à toutes les lignes d'un coup.
+- **Facturation à l'avancement** : `montantDejaFactureHt/Tva` (snapshot figé à la création =
+  somme des factures précédentes du contrat) → totaux **nets** (`getNetHt/Tva/Ttc`) affichés avec
+  une ligne de déduction. **Seule la dernière facture du contrat est modifiable** (lignes verrouillées
+  sinon) — voir `FactureRepository::estDerniere()` + option `lignes_modifiables` du `FactureType`.
+- **Délai de paiement** (`DelaiPaiement` : à réception / à la commande / 15-30-45-60 j) calcule
+  l'échéance (champ échéance conservé, éditable).
 - **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
   templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 
