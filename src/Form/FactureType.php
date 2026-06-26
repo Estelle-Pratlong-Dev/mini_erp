@@ -46,7 +46,12 @@ class FactureType extends AbstractType
                 'required' => false,
                 'placeholder' => '—',
                 'choice_label' => fn (DelaiPaiement $d) => $d->libelle(),
-                'help' => 'L\'échéance est calculée automatiquement à partir de la date d\'émission.',
+                'help' => 'Calcule l\'échéance à partir de la date d\'émission.',
+            ])
+            ->add('dateEcheance', DateType::class, [
+                'label' => 'Date d\'échéance',
+                'widget' => 'single_text',
+                'required' => false,
             ])
             ->add('modePaiement', EnumType::class, [
                 'class' => ModePaiement::class,

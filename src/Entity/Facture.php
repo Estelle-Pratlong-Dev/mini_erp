@@ -85,7 +85,7 @@ class Facture implements SoftDeletableInterface
     #[Groups(['facture:read', 'facture:write'])]
     private ?\DateTimeImmutable $dateEcheance = null;
 
-    #[ORM\Column(type: 'integer', nullable: true, enumType: DelaiPaiement::class)]
+    #[ORM\Column(length: 20, nullable: true, enumType: DelaiPaiement::class)]
     #[Groups(['facture:read', 'facture:write'])]
     private ?DelaiPaiement $delaiPaiement = null;
 
@@ -148,7 +148,7 @@ class Facture implements SoftDeletableInterface
     public function appliquerDelaiPaiement(): void
     {
         if ($this->delaiPaiement !== null && $this->dateEmission !== null) {
-            $this->dateEcheance = $this->dateEmission->modify('+' . $this->delaiPaiement->value . ' days');
+            $this->dateEcheance = $this->dateEmission->modify('+' . $this->delaiPaiement->jours() . ' days');
         }
     }
 
