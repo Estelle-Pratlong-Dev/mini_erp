@@ -9,13 +9,25 @@
         {{ form_start(form) }}
         <div class="row g-3">
             <div class="col-md-4">{{ form_row(form.type) }}</div>
+            <div class="col-md-4">
+                {{ form_label(form.categorie) }}
+                <div class="input-group">
+                    {{ form_widget(form.categorie) }}
+                    <button type="button" class="btn btn-outline-secondary" id="btn-add-categorie"
+                            data-url="{{ path('app_contact_categorie_add') }}"
+                            data-token="{{ csrf_token('add_categorie') }}" title="Ajouter une catégorie">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+                {{ form_errors(form.categorie) }}
+            </div>
             <div class="col-md-4">{{ form_row(form.nom) }}</div>
             <div class="col-md-4">{{ form_row(form.prenom) }}</div>
             <div class="col-md-4">{{ form_row(form.siret) }}</div>
             <div class="col-md-4">{{ form_row(form.numTva) }}</div>
-            <div class="col-md-4">{{ form_row(form.telephone) }}</div>
             <div class="col-md-6">{{ form_row(form.email) }}</div>
-            <div class="col-md-6">{{ form_row(form.adresse) }}</div>
+            <div class="col-md-6">{{ form_row(form.telephone) }}</div>
+            <div class="col-md-12 position-relative">{{ form_row(form.adresse) }}</div>
             <div class="col-md-3">{{ form_row(form.codePostal) }}</div>
             <div class="col-md-5">{{ form_row(form.ville) }}</div>
             <div class="col-md-4">{{ form_row(form.pays) }}</div>
@@ -28,4 +40,88 @@
         {{ form_end(form) }}
     </div>
 </div>
+
+<script>
+(function () {
+    // ----- 1) Grisage des champs selon le type -----
+    const typeSel = document.querySelector('.contact-type');
+    function setEnabled(el, on) {
+        el.disabled = !on;
+        const col = el.closest('.col-md-4, .col-md-6, .col-md-12, .col-md-3, .col-md-5');
+        if (col) col.style.opacity = on ? '1' : '.5';
+    }
+    function applyType() {
+        const particulier = typeSel.value === 'PARTICULIER';
+        document.querySelectorAll('.champ-particulier').forEach((el) => setEnabled(el, particulier));
+        document.querySelectorAll('.champ-pro').forEach((el) => setEnabled(el, !particulier));
+    }
+    if (typeSel) { typeSel.addEventListener('change', applyType); applyType(); }
+
+    // ----- 2) Ajout rapide d'une catégorie -----
+    const addBtn = document.getElementById('btn-add-categorie');
+    const catSel = document.querySelector('.contact-categorie');
+    if (addBtn && catSel) {
+        addBtn.addEventListener('click', async function () {
+            const nom = (prompt('Nom de la nouvelle catégorie :') || '').trim();
+            if (!nom) return;
+            const body = new FormData();
+            body.append('nom', nom);
+            body.append('_token', addBtn.dataset.token);
+            try {
+                const res = await fetch(addBtn.dataset.url, { method: 'POST', body });
+                const data = await res.json();
+                if (!res.ok) { alert(data.error || 'Erreur'); return; }
+                let opt = Array.from(catSel.options).find((o) => o.value == data.id);
+                if (!opt) { opt = new Option(data.nom, data.id); catSel.add(opt); }
+                catSel.value = data.id;
+            } catch (e) { alert('Erreur réseau'); }
+        });
+    }
+
+    // ----- 3) Auto-complétion d'adresse (Base Adresse Nationale) -----
+    const adr = document.querySelector('.adresse-autocomplete');
+    const cp = document.querySelector('.adresse-cp');
+    const ville = document.querySelector('.adresse-ville');
+    if (adr) {
+        const box = document.createElement('ul');
+        box.className = 'list-group position-absolute w-100 shadow-sm';
+        box.style.zIndex = '1000';
+        box.style.display = 'none';
+        adr.parentNode.appendChild(box);
+        let timer = null;
+
+        function hide() { box.style.display = 'none'; box.innerHTML = ''; }
+
+        adr.addEventListener('input', function () {
+            clearTimeout(timer);
+            const q = adr.value.trim();
+            if (q.length < 3) { hide(); return; }
+            timer = setTimeout(async function () {
+                try {
+                    const res = await fetch('https://api-adresse.data.gouv.fr/search/?limit=5&autocomplete=1&q=' + encodeURIComponent(q));
+                    const data = await res.json();
+                    box.innerHTML = '';
+                    (data.features || []).forEach((f) => {
+                        const p = f.properties;
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item list-group-item-action';
+                        li.style.cursor = 'pointer';
+                        li.textContent = p.label;
+                        li.addEventListener('mousedown', function (e) {
+                            e.preventDefault();
+                            adr.value = p.name || '';
+                            if (cp) cp.value = p.postcode || '';
+                            if (ville) ville.value = p.city || '';
+                            hide();
+                        });
+                        box.appendChild(li);
+                    });
+                    box.style.display = data.features && data.features.length ? 'block' : 'none';
+                } catch (e) { hide(); }
+            }, 300);
+        });
+        adr.addEventListener('blur', () => setTimeout(hide, 150));
+    }
+})();
+</script>
 {% endblock %}

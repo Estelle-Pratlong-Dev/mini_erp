@@ -3,12 +3,15 @@
 namespace App\Controller;
 
 use App\Attribute\RequireModule;
+use App\Entity\CategorieContact;
 use App\Entity\Contact;
 use App\Enum\CodeModule;
 use App\Form\ContactType;
+use App\Repository\CategorieContactRepository;
 use App\Repository\ContactRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,6 +28,27 @@ class ContactController extends AbstractController
         return $this->render('contact/index.html.twig', [
             'contacts' => $repository->findBy([], ['nom' => 'ASC']),
         ]);
+    }
+
+    #[Route('/categorie/ajout', name: 'app_contact_categorie_add', methods: ['POST'])]
+    #[IsGranted('ROLE_CONTACTS_CREER')]
+    public function ajoutCategorie(Request $request, EntityManagerInterface $em, CategorieContactRepository $repo): JsonResponse
+    {
+        if (!$this->isCsrfTokenValid('add_categorie', (string) $request->request->get('_token'))) {
+            return new JsonResponse(['error' => 'Jeton invalide.'], 403);
+        }
+        $nom = trim((string) $request->request->get('nom'));
+        if ($nom === '') {
+            return new JsonResponse(['error' => 'Le nom est requis.'], 422);
+        }
+
+        $categorie = $repo->findOneBy(['nom' => $nom]) ?? (new CategorieContact())->setNom($nom);
+        if ($categorie->getId() === null) {
+            $em->persist($categorie);
+            $em->flush();
+        }
+
+        return new JsonResponse(['id' => $categorie->getId(), 'nom' => $categorie->getNom()]);
     }
 
     #[Route('/nouveau', name: 'app_contact_new', methods: ['GET', 'POST'])]

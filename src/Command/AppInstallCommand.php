@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\CategorieContact;
 use App\Entity\Module;
 use App\Entity\Permission;
 use App\Entity\Role;
@@ -74,6 +75,7 @@ class AppInstallCommand extends Command
         $permissions = $this->seedPermissions($io);
         $adminRole = $this->seedAdminRole($permissions, $io);
         $this->seedSociete($io);
+        $this->seedCategoriesContact($io);
         $this->seedAdminUser($adminRole, (string) $input->getOption('email'), (string) $input->getOption('password'), $io);
 
         $this->em->flush();
@@ -157,6 +159,17 @@ class AppInstallCommand extends Command
         } else {
             $io->writeln(' - Société déjà présente.');
         }
+    }
+
+    private function seedCategoriesContact(SymfonyStyle $io): void
+    {
+        $repo = $this->em->getRepository(CategorieContact::class);
+        foreach (['Client', 'Prospect', 'Fournisseur', 'Partenaire'] as $nom) {
+            if (!$repo->findOneBy(['nom' => $nom])) {
+                $this->em->persist((new CategorieContact())->setNom($nom));
+            }
+        }
+        $io->writeln(' - Catégories de contact vérifiées.');
     }
 
     private function seedAdminUser(Role $adminRole, string $email, string $password, SymfonyStyle $io): void

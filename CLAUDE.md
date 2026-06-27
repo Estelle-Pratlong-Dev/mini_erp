@@ -156,6 +156,21 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - **PDF** (facture et devis/contrat) via `App\Service\PdfGenerator` (façade Dompdf) +
   templates `templates/pdf/{facture,contrat}.html.twig` (en-tête Société).
 
+## Listes de référence personnalisables (admin)
+- Patron pour les listes éditables par le client : entité dédiée (soft delete + audit) +
+  CRUD EasyAdmin (section « Listes de référence »). 1er exemple : **`CategorieContact`**.
+- Sur les formulaires métier : `EntityType` (filtré `actif = true`) + possibilité d'**ajout rapide**
+  (bouton « + » → endpoint JSON, ex. `app_contact_categorie_add`).
+- Convention : réserver ce patron aux **listes de classification** (catégories, types métier…) ;
+  garder en **enum PHP** ce qui porte de la logique/des workflows (CodeModule, StatutFacture,
+  DelaiPaiement avec `jours()`, etc.).
+
+## Contact (saisie assistée)
+- Champs **grisés selon le type** (JS) : Particulier → prénom ; Pro → SIRET/N° TVA.
+- Validation : email (`EmailType`), téléphone (regex), SIRET (14 chiffres + pattern HTML5).
+- **Auto-complétion d'adresse** via l'API publique **Base Adresse Nationale**
+  (`api-adresse.data.gouv.fr`, JS côté client, sans clé) → remplit adresse / CP / ville.
+
 ## Produits composés (nomenclature / BOM)
 - Un `Produit` peut avoir des **`Composant`** (table `composant` : produit parent + article
   composant + quantité). `Produit::isCompose()` indique s'il est composé.

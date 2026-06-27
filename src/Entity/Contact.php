@@ -46,6 +46,11 @@ class Contact implements SoftDeletableInterface
     #[Groups(['contact:read', 'contact:write'])]
     private TypeContact $type = TypeContact::PARTICULIER;
 
+    #[ORM\ManyToOne(targetEntity: CategorieContact::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['contact:read', 'contact:write'])]
+    private ?CategorieContact $categorie = null;
+
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Groups(['contact:read', 'contact:write'])]
@@ -70,6 +75,7 @@ class Contact implements SoftDeletableInterface
     private ?string $email = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\Regex(pattern: '/^[0-9 +().\-]{6,20}$/', message: 'Numéro de téléphone invalide.')]
     #[Groups(['contact:read', 'contact:write'])]
     private ?string $telephone = null;
 
@@ -99,6 +105,9 @@ class Contact implements SoftDeletableInterface
 
     public function getType(): TypeContact { return $this->type; }
     public function setType(TypeContact $type): static { $this->type = $type; return $this; }
+
+    public function getCategorie(): ?CategorieContact { return $this->categorie; }
+    public function setCategorie(?CategorieContact $categorie): static { $this->categorie = $categorie; return $this; }
 
     public function getNom(): ?string { return $this->nom; }
     public function setNom(string $nom): static { $this->nom = $nom; return $this; }

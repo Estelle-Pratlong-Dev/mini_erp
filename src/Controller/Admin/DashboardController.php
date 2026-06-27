@@ -33,6 +33,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(SocieteCrudController::class, 'Société', 'fa fa-building');
         yield MenuItem::linkTo(ModuleCrudController::class, 'Modules', 'fa fa-puzzle-piece');
 
+        yield MenuItem::section('Listes de référence');
+        yield MenuItem::linkTo(CategorieContactCrudController::class, 'Catégories de contact', 'fa fa-tags');
+
         yield MenuItem::section('Utilisateurs & droits');
         yield MenuItem::linkTo(UserCrudController::class, 'Utilisateurs', 'fa fa-users');
         yield MenuItem::linkTo(RoleCrudController::class, 'Rôles', 'fa fa-user-shield');

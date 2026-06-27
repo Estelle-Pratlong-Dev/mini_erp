@@ -14,13 +14,14 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>Type</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Ville</th><th class="text-end">Actions</th>
+                    <th>Type</th><th>Catégorie</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Ville</th><th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for contact in contacts %}
                 <tr>
                     <td><span class="badge text-bg-secondary">{{ contact.type.libelle }}</span></td>
+                    <td>{{ contact.categorie ? contact.categorie.nom : '—' }}</td>
                     <td>{{ contact }}</td>
                     <td>{{ contact.email }}</td>
                     <td>{{ contact.telephone }}</td>
@@ -38,7 +39,7 @@
                     </td>
                 </tr>
             {% else %}
-                <tr><td colspan="6" class="text-center text-muted py-4">Aucun contact.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">Aucun contact.</td></tr>
             {% endfor %}
             </tbody>
         </table>
