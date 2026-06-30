@@ -9,6 +9,11 @@
 {% endblock %}
 
 {% block main %}
+<div class="btn-group btn-group-sm mb-3" role="group">
+    <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary {{ filtre is null ? 'active' : '' }}">Tous</a>
+    <a href="{{ path('app_produit_index', {actif: 1}) }}" class="btn btn-outline-secondary {{ filtre == '1' ? 'active' : '' }}">Actifs</a>
+    <a href="{{ path('app_produit_index', {actif: 0}) }}" class="btn btn-outline-secondary {{ filtre == '0' ? 'active' : '' }}">Inactifs</a>
+</div>
 <div class="card shadow-sm">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -20,9 +25,13 @@
             </thead>
             <tbody>
             {% for produit in produits %}
-                <tr>
+                <tr class="{{ not produit.actif ? 'text-muted' : '' }}">
                     <td><code>{{ produit.reference }}</code></td>
-                    <td>{{ produit.designation }}{% if produit.compose %} <span class="badge text-bg-info">Composé</span>{% endif %}</td>
+                    <td>
+                        {{ produit.designation }}
+                        {% if produit.compose %} <span class="badge text-bg-info">Composé</span>{% endif %}
+                        {% if not produit.actif %} <span class="badge text-bg-secondary">Inactif</span>{% endif %}
+                    </td>
                     <td><span class="badge text-bg-secondary">{{ produit.type.libelle }}</span></td>
                     <td class="text-end">{{ produit.prixHt }} €</td>
                     <td class="text-end">

@@ -20,10 +20,19 @@ class ProduitController extends AbstractController
 {
     #[Route('', name: 'app_produit_index', methods: ['GET'])]
     #[IsGranted('ROLE_CATALOGUE_VOIR')]
-    public function index(ProduitRepository $repository): Response
+    public function index(ProduitRepository $repository, Request $request): Response
     {
+        $filtre = $request->query->get('actif'); // '1' = actifs, '0' = inactifs, sinon tous
+        $criteria = [];
+        if ($filtre === '1') {
+            $criteria['actif'] = true;
+        } elseif ($filtre === '0') {
+            $criteria['actif'] = false;
+        }
+
         return $this->render('produit/index.html.twig', [
-            'produits' => $repository->findBy([], ['designation' => 'ASC']),
+            'produits' => $repository->findBy($criteria, ['designation' => 'ASC']),
+            'filtre' => $filtre,
         ]);
     }
 
