@@ -38,6 +38,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ModePaiementCrudController::class, 'Modes de paiement', 'fa fa-credit-card');
         yield MenuItem::linkTo(DelaiPaiementCrudController::class, 'Délais de paiement', 'fa fa-calendar-days');
         yield MenuItem::linkTo(UniteProduitCrudController::class, 'Unités de produit', 'fa fa-ruler');
+        yield MenuItem::linkTo(TauxTvaCrudController::class, 'Taux de TVA', 'fa fa-percent');
 
         yield MenuItem::section('Utilisateurs & droits');
         yield MenuItem::linkTo(UserCrudController::class, 'Utilisateurs', 'fa fa-users');

@@ -7,6 +7,7 @@ use App\Entity\DelaiPaiement;
 use App\Entity\ModePaiement;
 use App\Entity\Module;
 use App\Entity\Permission;
+use App\Entity\TauxTva;
 use App\Entity\UniteProduit;
 use App\Entity\Role;
 use App\Entity\Societe;
@@ -82,6 +83,7 @@ class AppInstallCommand extends Command
         $this->seedModesPaiement($io);
         $this->seedDelaisPaiement($io);
         $this->seedUnites($io);
+        $this->seedTauxTva($io);
         $this->seedAdminUser($adminRole, (string) $input->getOption('email'), (string) $input->getOption('password'), $io);
 
         $this->em->flush();
@@ -210,6 +212,24 @@ class AppInstallCommand extends Command
             }
         }
         $io->writeln(' - Unités de produit vérifiées.');
+    }
+
+    private function seedTauxTva(SymfonyStyle $io): void
+    {
+        $repo = $this->em->getRepository(TauxTva::class);
+        $taux = [
+            ['20.00', 'Normal'],
+            ['10.00', 'Intermédiaire'],
+            ['5.50', 'Réduit'],
+            ['2.10', 'Super réduit'],
+            ['0.00', 'Exonéré'],
+        ];
+        foreach ($taux as [$valeur, $libelle]) {
+            if (!$repo->findOneBy(['taux' => $valeur])) {
+                $this->em->persist((new TauxTva())->setTaux($valeur)->setLibelle($libelle));
+            }
+        }
+        $io->writeln(' - Taux de TVA vérifiés.');
     }
 
     private function seedAdminUser(Role $adminRole, string $email, string $password, SymfonyStyle $io): void

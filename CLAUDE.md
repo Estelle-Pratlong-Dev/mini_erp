@@ -173,7 +173,11 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ## Listes de référence personnalisables (admin)
 - Patron pour les listes éditables par le client : entité dédiée (soft delete + audit) +
   CRUD EasyAdmin (section « Listes de référence »). Exemples : **`CategorieContact`**,
-  **`ModePaiement`**, **`DelaiPaiement`** (avec un champ `jours`), **`UniteProduit`**.
+  **`ModePaiement`**, **`DelaiPaiement`** (avec un champ `jours`), **`UniteProduit`**, **`TauxTva`**.
+- **`TauxTva`** : liste de taux (ex. 20 % Normal, 10 %, 5,5 %…). Le taux choisi est **recopié en
+  décimal** (snapshot) sur le `Produit` et la `LigneArticle` — modifier/désactiver un taux n'altère
+  pas les documents existants. Les formulaires (produit + lignes) exposent un `ChoiceType` alimenté
+  par `TauxTvaRepository::actifs()` (label `getLibelleAffiche()`, valeur = le décimal).
 - Sur les formulaires métier : `EntityType` (filtré `actif = true`) + possibilité d'**ajout rapide**
   (bouton « + » → endpoint JSON, ex. `app_contact_categorie_add`).
 - Convention : réserver ce patron aux **listes de classification** (catégories, types métier…) ;

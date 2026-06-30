@@ -5,14 +5,15 @@ namespace App\Form;
 use App\Entity\Produit;
 use App\Entity\UniteProduit;
 use App\Enum\TypeProduit;
+use App\Repository\TauxTvaRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,8 +21,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ProduitType extends AbstractType
 {
+    public function __construct(private readonly TauxTvaRepository $tauxTvaRepo)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $tauxChoices = [];
+        foreach ($this->tauxTvaRepo->actifs() as $t) {
+            $tauxChoices[$t->getLibelleAffiche()] = $t->getTaux();
+        }
+
         $builder
             ->add('reference', TextType::class, ['label' => 'Référence'])
             ->add('designation', TextType::class, ['label' => 'Désignation'])
@@ -37,7 +47,11 @@ class ProduitType extends AbstractType
                 'help' => 'Pour un produit composé, le coût est calculé à la demande depuis les composants (non saisi ici).',
             ])
             ->add('prixHt', MoneyType::class, ['label' => 'Prix de vente HT', 'currency' => 'EUR'])
-            ->add('tauxTva', NumberType::class, ['label' => 'Taux TVA (%)'])
+            ->add('tauxTva', ChoiceType::class, [
+                'label' => 'Taux TVA',
+                'choices' => $tauxChoices,
+                'placeholder' => $tauxChoices ? false : '— Aucun taux configuré —',
+            ])
             ->add('unite', EntityType::class, [
                 'class' => UniteProduit::class,
                 'label' => 'Unité',
