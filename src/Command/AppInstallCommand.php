@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Entity\CategorieContact;
+use App\Entity\DelaiPaiement;
+use App\Entity\ModePaiement;
 use App\Entity\Module;
 use App\Entity\Permission;
 use App\Entity\Role;
@@ -76,6 +78,8 @@ class AppInstallCommand extends Command
         $adminRole = $this->seedAdminRole($permissions, $io);
         $this->seedSociete($io);
         $this->seedCategoriesContact($io);
+        $this->seedModesPaiement($io);
+        $this->seedDelaisPaiement($io);
         $this->seedAdminUser($adminRole, (string) $input->getOption('email'), (string) $input->getOption('password'), $io);
 
         $this->em->flush();
@@ -170,6 +174,29 @@ class AppInstallCommand extends Command
             }
         }
         $io->writeln(' - Catégories de contact vérifiées.');
+    }
+
+    private function seedModesPaiement(SymfonyStyle $io): void
+    {
+        $repo = $this->em->getRepository(ModePaiement::class);
+        foreach (['Virement', 'Carte bancaire', 'Chèque', 'Espèces', 'Prélèvement'] as $nom) {
+            if (!$repo->findOneBy(['nom' => $nom])) {
+                $this->em->persist((new ModePaiement())->setNom($nom));
+            }
+        }
+        $io->writeln(' - Modes de paiement vérifiés.');
+    }
+
+    private function seedDelaisPaiement(SymfonyStyle $io): void
+    {
+        $repo = $this->em->getRepository(DelaiPaiement::class);
+        $delais = ['À réception' => 0, 'À la commande' => 0, '15 jours' => 15, '30 jours' => 30, '45 jours' => 45, '60 jours' => 60];
+        foreach ($delais as $nom => $jours) {
+            if (!$repo->findOneBy(['nom' => $nom])) {
+                $this->em->persist((new DelaiPaiement())->setNom($nom)->setJours($jours));
+            }
+        }
+        $io->writeln(' - Délais de paiement vérifiés.');
     }
 
     private function seedAdminUser(Role $adminRole, string $email, string $password, SymfonyStyle $io): void

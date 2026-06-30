@@ -8,8 +8,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use App\Enum\DelaiPaiement;
-use App\Enum\ModePaiement;
 use App\Enum\StatutFacture;
 use App\Repository\FactureRepository;
 use App\State\FacturePersistProcessor;
@@ -90,12 +88,14 @@ class Facture implements SoftDeletableInterface
     #[Groups(['facture:read', 'facture:write'])]
     private ?\DateTimeImmutable $dateEcheance = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: DelaiPaiement::class)]
-    #[Groups(['facture:read', 'facture:write'])]
+    #[ORM\ManyToOne(targetEntity: DelaiPaiement::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['facture:read'])]
     private ?DelaiPaiement $delaiPaiement = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: ModePaiement::class)]
-    #[Groups(['facture:read', 'facture:write'])]
+    #[ORM\ManyToOne(targetEntity: ModePaiement::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['facture:read'])]
     private ?ModePaiement $modePaiement = null;
 
     /** Snapshot (figé à la création) du HT déjà facturé sur le contrat par les factures précédentes. */
@@ -178,7 +178,7 @@ class Facture implements SoftDeletableInterface
     public function appliquerDelaiPaiement(): void
     {
         if ($this->delaiPaiement !== null && $this->dateEmission !== null) {
-            $this->dateEcheance = $this->dateEmission->modify('+' . $this->delaiPaiement->jours() . ' days');
+            $this->dateEcheance = $this->dateEmission->modify('+' . $this->delaiPaiement->getJours() . ' days');
         }
     }
 

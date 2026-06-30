@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Entity;
 
 use App\Entity\Facture;
 use App\Entity\LigneArticle;
-use App\Enum\DelaiPaiement;
+use App\Entity\DelaiPaiement;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -65,7 +65,7 @@ class FacturationPartielleTest extends TestCase
     {
         $facture = (new Facture())
             ->setDateEmission(new \DateTimeImmutable('2026-06-22'))
-            ->setDelaiPaiement(DelaiPaiement::JOURS_30);
+            ->setDelaiPaiement((new DelaiPaiement())->setNom('30 jours')->setJours(30));
 
         $facture->appliquerDelaiPaiement();
 

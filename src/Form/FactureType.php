@@ -3,10 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Contact;
+use App\Entity\DelaiPaiement;
 use App\Entity\Facture;
+use App\Entity\ModePaiement;
 use App\Entity\Projet;
-use App\Enum\DelaiPaiement;
-use App\Enum\ModePaiement;
 use App\Enum\StatutFacture;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -40,12 +40,15 @@ class FactureType extends AbstractType
                 'choice_label' => fn (StatutFacture $s) => $s->libelle(),
             ])
             ->add('dateEmission', DateType::class, ['label' => 'Date d\'émission', 'widget' => 'single_text'])
-            ->add('delaiPaiement', EnumType::class, [
+            ->add('delaiPaiement', EntityType::class, [
                 'class' => DelaiPaiement::class,
                 'label' => 'Délai de paiement',
                 'required' => false,
                 'placeholder' => '—',
-                'choice_label' => fn (DelaiPaiement $d) => $d->libelle(),
+                'choice_label' => fn (DelaiPaiement $d) => $d->getNom(),
+                'choice_attr' => fn (DelaiPaiement $d) => ['data-jours' => $d->getJours()],
+                'query_builder' => fn ($repo) => $repo->createQueryBuilder('d')
+                    ->where('d.actif = true')->orderBy('d.jours', 'ASC'),
                 'help' => 'Calcule l\'échéance à partir de la date d\'émission.',
             ])
             ->add('dateEcheance', DateType::class, [
@@ -53,12 +56,14 @@ class FactureType extends AbstractType
                 'widget' => 'single_text',
                 'required' => false,
             ])
-            ->add('modePaiement', EnumType::class, [
+            ->add('modePaiement', EntityType::class, [
                 'class' => ModePaiement::class,
                 'label' => 'Mode de paiement',
                 'required' => false,
                 'placeholder' => '—',
-                'choice_label' => fn (ModePaiement $m) => $m->libelle(),
+                'choice_label' => fn (ModePaiement $m) => $m->getNom(),
+                'query_builder' => fn ($repo) => $repo->createQueryBuilder('m')
+                    ->where('m.actif = true')->orderBy('m.nom', 'ASC'),
             ])
             ->add('notes', TextareaType::class, ['label' => 'Notes', 'required' => false])
             ->add('lignes', CollectionType::class, [

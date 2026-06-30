@@ -148,8 +148,9 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   somme des factures précédentes du contrat) → totaux **nets** (`getNetHt/Tva/Ttc`) affichés avec
   une ligne de déduction. **Seule la dernière facture du contrat est modifiable** (lignes verrouillées
   sinon) — voir `FactureRepository::estDerniere()` + option `lignes_modifiables` du `FactureType`.
-- **Délai de paiement** (`DelaiPaiement` : à réception / à la commande / 15-30-45-60 j) calcule
-  l'échéance (champ échéance conservé, éditable).
+- **Délai de paiement** et **mode de paiement** sont des **entités** (listes de référence
+  gérables en admin). `DelaiPaiement.jours` calcule l'échéance (`appliquerDelaiPaiement()`),
+  pré-calculée côté JS via `data-jours` sur les options ; le champ échéance reste éditable.
 - **Rang de la facture dans son contrat** (1ʳᵉ, 2ᵉ…) **stocké en base** (colonne `rang_contrat`,
   figé à la création) pour la traçabilité / les stats ; affiché en lecture seule (show + edit).
   Repli `FactureRepository::rangDansContrat()` pour les anciennes factures sans valeur.
@@ -158,7 +159,8 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 
 ## Listes de référence personnalisables (admin)
 - Patron pour les listes éditables par le client : entité dédiée (soft delete + audit) +
-  CRUD EasyAdmin (section « Listes de référence »). 1er exemple : **`CategorieContact`**.
+  CRUD EasyAdmin (section « Listes de référence »). Exemples : **`CategorieContact`**,
+  **`ModePaiement`**, **`DelaiPaiement`** (avec un champ `jours`).
 - Sur les formulaires métier : `EntityType` (filtré `actif = true`) + possibilité d'**ajout rapide**
   (bouton « + » → endpoint JSON, ex. `app_contact_categorie_add`).
 - Convention : réserver ce patron aux **listes de classification** (catégories, types métier…) ;

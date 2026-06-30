@@ -29,14 +29,15 @@
 
         <script>
         (function () {
-            const JOURS = { A_RECEPTION: 0, A_LA_COMMANDE: 0, JOURS_15: 15, JOURS_30: 30, JOURS_45: 45, JOURS_60: 60 };
             const emission = document.getElementById('facture_dateEmission');
             const delai = document.getElementById('facture_delaiPaiement');
             const echeance = document.getElementById('facture_dateEcheance');
             function recalc() {
                 if (!emission || !delai || !echeance || !emission.value || !delai.value) return;
-                const j = JOURS[delai.value];
-                if (j === undefined) return;
+                const opt = delai.selectedOptions[0];
+                if (!opt || opt.dataset.jours === undefined) return;
+                const j = parseInt(opt.dataset.jours, 10);
+                if (isNaN(j)) return;
                 const d = new Date(emission.value);
                 d.setDate(d.getDate() + j);
                 echeance.value = d.toISOString().slice(0, 10);

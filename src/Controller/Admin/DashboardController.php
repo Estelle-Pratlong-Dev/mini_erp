@@ -35,6 +35,8 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Listes de référence');
         yield MenuItem::linkTo(CategorieContactCrudController::class, 'Catégories de contact', 'fa fa-tags');
+        yield MenuItem::linkTo(ModePaiementCrudController::class, 'Modes de paiement', 'fa fa-credit-card');
+        yield MenuItem::linkTo(DelaiPaiementCrudController::class, 'Délais de paiement', 'fa fa-calendar-days');
 
         yield MenuItem::section('Utilisateurs & droits');
         yield MenuItem::linkTo(UserCrudController::class, 'Utilisateurs', 'fa fa-users');

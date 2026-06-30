@@ -37,8 +37,8 @@
             <dd class="col-sm-9">{{ facture.dateEmission|date('d/m/Y') }}{% if facture.dateEcheance %} · échéance {{ facture.dateEcheance|date('d/m/Y') }}{% endif %}</dd>
             <dt class="col-sm-3">Paiement</dt>
             <dd class="col-sm-9">
-                {{ facture.delaiPaiement ? facture.delaiPaiement.libelle : '—' }}
-                {% if facture.modePaiement %} · {{ facture.modePaiement.libelle }}{% endif %}
+                {{ facture.delaiPaiement ? facture.delaiPaiement.nom : '—' }}
+                {% if facture.modePaiement %} · {{ facture.modePaiement.nom }}{% endif %}
             </dd>
         </dl>
     </div>
