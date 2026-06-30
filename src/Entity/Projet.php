@@ -69,6 +69,11 @@ class Projet implements SoftDeletableInterface
     #[Groups(['projet:read', 'projet:write'])]
     private ?string $description = null;
 
+    /** Nom du fichier image stocké (photo de présentation du projet). */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['projet:read'])]
+    private ?string $photo = null;
+
     /** @var Collection<int, Contrat> */
     #[ORM\OneToMany(targetEntity: Contrat::class, mappedBy: 'projet', orphanRemoval: true)]
     private Collection $contrats;
@@ -102,6 +107,9 @@ class Projet implements SoftDeletableInterface
 
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): static { $this->description = $description; return $this; }
+
+    public function getPhoto(): ?string { return $this->photo; }
+    public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
 
     /** @return Collection<int, Contrat> */
     public function getContrats(): Collection { return $this->contrats; }

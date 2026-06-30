@@ -19,6 +19,10 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body">
+                {% if projet.photo %}
+                    <img src="{{ path('app_projet_photo', {id: projet.id}) }}" alt="Photo du projet"
+                         class="img-fluid rounded mb-3 w-100" style="max-height:220px; object-fit:cover;">
+                {% endif %}
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Statut</dt>
                     <dd class="col-sm-8"><span class="badge text-bg-{{ projet.statut.couleur }}">{{ projet.statut.libelle }}</span></dd>

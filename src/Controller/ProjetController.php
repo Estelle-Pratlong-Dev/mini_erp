@@ -9,6 +9,10 @@ use App\Form\ProjetType;
 use App\Repository\ProjetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -36,6 +40,7 @@ class ProjetController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handlePhotoUpload($form, $projet);
             $em->persist($projet);
             $em->flush();
             $this->addFlash('success', 'Projet créé.');
@@ -61,6 +66,7 @@ class ProjetController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handlePhotoUpload($form, $projet);
             $em->flush();
             $this->addFlash('success', 'Projet modifié.');
 
@@ -81,5 +87,47 @@ class ProjetController extends AbstractController
         }
 
         return $this->redirectToRoute('app_projet_index');
+    }
+
+    #[Route('/{id}/photo', name: 'app_projet_photo', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_PROJETS_VOIR')]
+    public function photo(Projet $projet): Response
+    {
+        $chemin = $this->photoDir() . '/' . $projet->getPhoto();
+        if (!$projet->getPhoto() || !is_file($chemin)) {
+            throw $this->createNotFoundException('Aucune photo.');
+        }
+
+        return new BinaryFileResponse($chemin); // affichage inline
+    }
+
+    private function photoDir(): string
+    {
+        return $this->getParameter('kernel.project_dir') . '/var/uploads/projets';
+    }
+
+    private function handlePhotoUpload(FormInterface $form, Projet $projet): void
+    {
+        /** @var UploadedFile|null $file */
+        $file = $form->get('photoFile')->getData();
+        if (!$file) {
+            return;
+        }
+
+        $ancienne = $projet->getPhoto();
+        $nomStocke = uniqid('projet_', true) . '.' . ($file->guessExtension() ?: 'bin');
+        try {
+            $file->move($this->photoDir(), $nomStocke);
+        } catch (FileException) {
+            $this->addFlash('error', 'Échec de l\'enregistrement de la photo.');
+
+            return;
+        }
+        $projet->setPhoto($nomStocke);
+
+        // On supprime l'ancien fichier remplacé (le fichier seul, l'historique reste en base via l'audit).
+        if ($ancienne && is_file($this->photoDir() . '/' . $ancienne)) {
+            @unlink($this->photoDir() . '/' . $ancienne);
+        }
     }
 }

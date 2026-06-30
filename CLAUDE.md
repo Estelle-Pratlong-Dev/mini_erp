@@ -122,6 +122,10 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - Entité `PieceJointe` rattachable à un `Projet`, un `Contrat` et/ou une `Facture`.
 - Fichiers stockés hors web dans `var/uploads/pieces/` (gitignoré via `var/`), servis par
   `PieceJointeController` (download sécurisé `ROLE_USER`). Upload manuel (pas de VichUploader).
+- **Photo de projet** : `Projet.photo` (nom de fichier), image unique stockée dans
+  `var/uploads/projets/`, servie *inline* par `ProjetController::photo()` (route `app_projet_photo`,
+  `ROLE_PROJETS_VOIR`) et affichée sur l'aperçu. Upload via champ non mappé `photoFile` (contrainte
+  `Image`, 5 Mo) ; l'ancien fichier est supprimé au remplacement.
 
 ## Lignes de documents
 - `LigneArticle` (table `ligne_article`) = les **lignes d'articles** d'un document commercial.
