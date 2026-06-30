@@ -11,20 +11,40 @@ use App\Entity\Produit;
 class NomenclatureService
 {
     /**
-     * Prix d'achat d'un produit composé = somme (prix d'achat composant × quantité).
-     * Utilise le prix d'achat stocké de chaque composant (déjà calculé s'il est lui-même composé).
+     * Coût d'achat réel d'un produit, calculé à la demande (jamais stocké pour un composé) :
+     * - produit simple → son prix d'achat saisi ;
+     * - produit composé → somme récursive (coût composant × quantité).
+     * Toujours à jour vis-à-vis des prix d'achat des articles de base.
      */
-    public function prixAchatCompose(Produit $produit): float
+    public function coutAchat(Produit $produit): float
     {
+        return round($this->coutAchatRecursif($produit, []), 2);
+    }
+
+    /**
+     * @param list<int> $visites
+     */
+    private function coutAchatRecursif(Produit $produit, array $visites): float
+    {
+        if (!$produit->isCompose()) {
+            return (float) $produit->getPrixAchatHt();
+        }
+
+        $oid = spl_object_id($produit);
+        if (in_array($oid, $visites, true)) {
+            return 0.0; // protection anti-cycle
+        }
+        $visites[] = $oid;
+
         $total = 0.0;
         foreach ($produit->getComposants() as $composant) {
             $article = $composant->getComposant();
             if ($article !== null) {
-                $total += (float) $article->getPrixAchatHt() * (float) $composant->getQuantite();
+                $total += $this->coutAchatRecursif($article, $visites) * (float) $composant->getQuantite();
             }
         }
 
-        return round($total, 2);
+        return $total;
     }
 
     /**

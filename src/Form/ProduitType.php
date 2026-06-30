@@ -34,7 +34,7 @@ class ProduitType extends AbstractType
             ->add('prixAchatHt', MoneyType::class, [
                 'label' => 'Prix d\'achat HT', 'currency' => 'EUR', 'required' => false,
                 'attr' => ['class' => 'prix-achat'],
-                'help' => 'Pour un produit composé, calculé automatiquement depuis les composants.',
+                'help' => 'Produit simple : saisi. Produit composé : calculé à la demande depuis les composants (indicatif, non stocké).',
             ])
             ->add('prixHt', MoneyType::class, ['label' => 'Prix de vente HT', 'currency' => 'EUR'])
             ->add('tauxTva', NumberType::class, ['label' => 'Taux TVA (%)'])

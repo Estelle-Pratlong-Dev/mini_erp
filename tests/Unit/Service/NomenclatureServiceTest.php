@@ -54,7 +54,14 @@ class NomenclatureServiceTest extends TestCase
         self::assertSame(7.2, $besoins[0]['quantite']); // 12 × 0.6
     }
 
-    public function testPrixAchatCompose(): void
+    public function testCoutAchatSimple(): void
+    {
+        $rose = $this->produit('ROSE')->setPrixAchatHt('0.60');
+
+        self::assertSame(0.60, (new NomenclatureService())->coutAchat($rose));
+    }
+
+    public function testCoutAchatCompose(): void
     {
         $rose = $this->produit('ROSE')->setPrixAchatHt('0.60');
         $lys = $this->produit('LYS')->setPrixAchatHt('0.90');
@@ -63,7 +70,18 @@ class NomenclatureServiceTest extends TestCase
         $this->composer($compo, $lys, '4');
 
         // 6 × 0.60 + 4 × 0.90 = 7.20
-        self::assertSame(7.20, (new NomenclatureService())->prixAchatCompose($compo));
+        self::assertSame(7.20, (new NomenclatureService())->coutAchat($compo));
+    }
+
+    public function testCoutAchatImbrique(): void
+    {
+        $rose = $this->produit('ROSE')->setPrixAchatHt('0.60');
+        $bouquet = $this->produit('BOUQUET');
+        $this->composer($bouquet, $rose, '6'); // coût 3.60
+        $coffret = $this->produit('COFFRET');
+        $this->composer($coffret, $bouquet, '2'); // 2 × 3.60 = 7.20
+
+        self::assertSame(7.20, (new NomenclatureService())->coutAchat($coffret));
     }
 
     public function testProtectionAntiCycle(): void

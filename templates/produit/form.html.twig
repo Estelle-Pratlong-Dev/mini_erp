@@ -73,7 +73,7 @@
             function recompute() {
                 if (!prixAchat) return;
                 const rows = body.querySelectorAll('tr');
-                if (rows.length === 0) { prixAchat.readOnly = false; return; }
+                if (rows.length === 0) { prixAchat.disabled = false; return; }
                 let total = 0;
                 rows.forEach((r) => {
                     const sel = r.querySelector('.composant-article');
@@ -85,7 +85,7 @@
                     if (!isNaN(pa) && !isNaN(q)) total += pa * q;
                 });
                 prixAchat.value = (Math.round(total * 100) / 100).toFixed(2);
-                prixAchat.readOnly = true;
+                prixAchat.disabled = true;
             }
 
             function wrap(html) {
@@ -130,7 +130,7 @@
                     recompute();
                 } else {
                     body.innerHTML = '';            // pas de composants pour un produit simple
-                    if (prixAchat) prixAchat.readOnly = false;
+                    if (prixAchat) prixAchat.disabled = false;
                 }
             }
 

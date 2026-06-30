@@ -186,9 +186,11 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   composé en besoins d'articles de base (compositions imbriquées, protection anti-cycle).
 - La **décrémentation réelle du stock** des composants se fera dans le module **Stock / Vente**
   (utilisera `NomenclatureService`). Aujourd'hui : modèle + éclatement prêts, pas de mouvement de stock.
-- **Prix** : `Produit` a `prixAchatHt` (achat) et `prixHt` (vente) + `getMargeHt()`. Pour un produit
-  **composé**, le prix d'achat est **calculé** (`NomenclatureService::prixAchatCompose()` = Σ achat
-  composant × qté), recalculé au save (contrôleur) et en direct côté form (JS via `data-prix-achat`).
+- **Prix** : `Produit` a `prixAchatHt` (achat, **saisi pour un produit simple**) et `prixHt` (vente).
+  Pour un **composé**, le coût d'achat n'est **pas stocké** : il est **calculé à la demande**
+  (`NomenclatureService::coutAchat()` = Σ récursive coût composant × qté, anti-cycle) — toujours à
+  jour si un ingrédient change. Le form l'affiche en direct (JS, champ désactivé) à titre indicatif.
+  Un éventuel instantané de coût se fera **au moment de la vente** (historique comptable), pas sur le produit.
 - **Unité** = relation vers `UniteProduit` (liste personnalisable).
 
 ## État (phases livrées)

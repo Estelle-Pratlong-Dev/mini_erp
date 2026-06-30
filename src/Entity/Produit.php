@@ -147,13 +147,6 @@ class Produit implements SoftDeletableInterface
     public function getUnite(): ?UniteProduit { return $this->unite; }
     public function setUnite(?UniteProduit $unite): static { $this->unite = $unite; return $this; }
 
-    /** Marge brute unitaire = prix de vente − prix d'achat (HT). */
-    #[Groups(['produit:read'])]
-    public function getMargeHt(): float
-    {
-        return round((float) $this->prixHt - (float) $this->prixAchatHt, 2);
-    }
-
     public function isGereStock(): bool { return $this->gereStock; }
     public function setGereStock(bool $gereStock): static { $this->gereStock = $gereStock; return $this; }
 
