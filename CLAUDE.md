@@ -172,6 +172,11 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 - Validation : email (`EmailType`), téléphone (regex), SIRET (14 chiffres + pattern HTML5).
 - **Auto-complétion d'adresse** via l'API publique **Base Adresse Nationale**
   (`api-adresse.data.gouv.fr`, JS côté client, sans clé) → remplit adresse / CP / ville.
+- **Auto-remplissage entreprise** (types pro) via l'API **Recherche d'entreprises**
+  (`recherche-entreprises.api.gouv.fr`) : depuis le nom → raison sociale, SIRET, adresse, CP,
+  ville, et n° TVA calculé depuis le SIREN.
+- **Alerte de doublon** à la création (n'empêche pas) : endpoint `app_contact_check_duplicate`
+  (match nom / email / SIRET) → popup de confirmation côté JS.
 
 ## Produits composés (nomenclature / BOM)
 - Un `Produit` peut avoir des **`Composant`** (table `composant` : produit parent + article

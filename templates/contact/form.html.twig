@@ -124,4 +124,98 @@
     }
 })();
 </script>
+
+<script>
+(function () {
+    const typeSel = document.querySelector('.contact-type');
+    const nom = document.getElementById('contact_nom');
+    const siret = document.getElementById('contact_siret');
+    const tva = document.getElementById('contact_numTva');
+    const adr = document.getElementById('contact_adresse');
+    const cp = document.getElementById('contact_codePostal');
+    const ville = document.getElementById('contact_ville');
+    if (!nom) return;
+    const estPro = () => typeSel && typeSel.value !== 'PARTICULIER';
+
+    // ----- Auto-remplissage entreprise (API Recherche d'entreprises) -----
+    function tvaFr(siren) {
+        const s = parseInt(siren, 10);
+        if (isNaN(s)) return '';
+        const cle = (12 + 3 * (s % 97)) % 97;
+        return 'FR' + String(cle).padStart(2, '0') + siren;
+    }
+    nom.parentNode.style.position = 'relative';
+    const box = document.createElement('ul');
+    box.className = 'list-group position-absolute w-100 shadow-sm';
+    box.style.zIndex = '1000';
+    box.style.display = 'none';
+    nom.parentNode.appendChild(box);
+    let timer = null;
+    const hide = () => { box.style.display = 'none'; box.innerHTML = ''; };
+
+    nom.addEventListener('input', function () {
+        clearTimeout(timer);
+        if (!estPro()) { hide(); return; }
+        const q = nom.value.trim();
+        if (q.length < 3) { hide(); return; }
+        timer = setTimeout(async function () {
+            try {
+                const res = await fetch('https://recherche-entreprises.api.gouv.fr/search?per_page=5&q=' + encodeURIComponent(q));
+                const data = await res.json();
+                box.innerHTML = '';
+                (data.results || []).forEach((r) => {
+                    const s = r.siege || {};
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item list-group-item-action';
+                    li.style.cursor = 'pointer';
+                    li.innerHTML = '<strong>' + (r.nom_complet || '') + '</strong> <small class="text-muted">' + (s.libelle_commune || '') + (s.siret ? ' · ' + s.siret : '') + '</small>';
+                    li.addEventListener('mousedown', function (e) {
+                        e.preventDefault();
+                        nom.value = r.nom_complet || r.nom_raison_sociale || nom.value;
+                        if (siret) siret.value = s.siret || '';
+                        if (tva && r.siren) tva.value = tvaFr(r.siren);
+                        const rue = [s.numero_voie, s.type_voie, s.libelle_voie].filter(Boolean).join(' ');
+                        if (adr) adr.value = rue || s.adresse || '';
+                        if (cp) cp.value = s.code_postal || '';
+                        if (ville) ville.value = s.libelle_commune || '';
+                        hide();
+                    });
+                    box.appendChild(li);
+                });
+                box.style.display = (data.results && data.results.length) ? 'block' : 'none';
+            } catch (e) { hide(); }
+        }, 350);
+    });
+    nom.addEventListener('blur', () => setTimeout(hide, 150));
+
+    // ----- Alerte de doublon à la création (n'empêche pas) -----
+    const isNew = {{ form.vars.data.id is null ? 'true' : 'false' }};
+    const checkUrl = '{{ path('app_contact_check_duplicate') }}';
+    const form = nom.form;
+    if (isNew && form) {
+        let confirme = false;
+        form.addEventListener('submit', async function (e) {
+            if (confirme) return; // déjà confirmé
+            e.preventDefault();
+            const params = new URLSearchParams({
+                nom: nom.value || '',
+                email: (document.getElementById('contact_email') || {}).value || '',
+                siret: siret ? siret.value : '',
+            });
+            try {
+                const res = await fetch(checkUrl + '?' + params.toString());
+                const matches = await res.json();
+                if (matches.length > 0) {
+                    const liste = matches.map((m) => '• ' + m.nom + (m.ville ? ' (' + m.ville + ')' : '')).join('\n');
+                    if (!confirm('⚠️ Un contact similaire existe déjà :\n\n' + liste + '\n\nCréer quand même ce contact ?')) {
+                        return; // annulé
+                    }
+                }
+            } catch (err) { /* en cas d'erreur réseau, on laisse passer */ }
+            confirme = true;
+            form.submit();
+        });
+    }
+})();
+</script>
 {% endblock %}

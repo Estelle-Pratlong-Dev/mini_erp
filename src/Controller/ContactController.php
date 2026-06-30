@@ -51,6 +51,42 @@ class ContactController extends AbstractController
         return new JsonResponse(['id' => $categorie->getId(), 'nom' => $categorie->getNom()]);
     }
 
+    #[Route('/verifier-doublon', name: 'app_contact_check_duplicate', methods: ['GET'])]
+    #[IsGranted('ROLE_CONTACTS_VOIR')]
+    public function verifierDoublon(Request $request, ContactRepository $repo): JsonResponse
+    {
+        $nom = trim((string) $request->query->get('nom'));
+        $email = trim((string) $request->query->get('email'));
+        $siret = trim((string) $request->query->get('siret'));
+
+        $qb = $repo->createQueryBuilder('c');
+        $or = $qb->expr()->orX();
+        if ($nom !== '') {
+            $or->add('LOWER(c.nom) = :nom');
+            $qb->setParameter('nom', mb_strtolower($nom));
+        }
+        if ($email !== '') {
+            $or->add('LOWER(c.email) = :email');
+            $qb->setParameter('email', mb_strtolower($email));
+        }
+        if ($siret !== '') {
+            $or->add('c.siret = :siret');
+            $qb->setParameter('siret', $siret);
+        }
+        if ($or->count() === 0) {
+            return new JsonResponse([]);
+        }
+
+        $matches = $qb->where($or)->setMaxResults(5)->getQuery()->getResult();
+
+        return new JsonResponse(array_map(static fn (Contact $c): array => [
+            'id' => $c->getId(),
+            'nom' => (string) $c,
+            'ville' => $c->getVille(),
+            'email' => $c->getEmail(),
+        ], $matches));
+    }
+
     #[Route('/nouveau', name: 'app_contact_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_CONTACTS_CREER')]
     public function new(Request $request, EntityManagerInterface $em): Response
