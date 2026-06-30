@@ -91,6 +91,12 @@ class Societe
     #[ORM\Column]
     private int $prochainNumeroFacture = 1;
 
+    #[ORM\Column(length: 20, options: ['default' => 'DEV-'])]
+    private string $prefixeContrat = 'DEV-';
+
+    #[ORM\Column(options: ['default' => 1])]
+    private int $prochainNumeroContrat = 1;
+
     public function getId(): ?int { return $this->id; }
 
     public function getRaisonSociale(): ?string { return $this->raisonSociale; }
@@ -158,6 +164,12 @@ class Societe
 
     public function getProchainNumeroFacture(): int { return $this->prochainNumeroFacture; }
     public function setProchainNumeroFacture(int $v): static { $this->prochainNumeroFacture = $v; return $this; }
+
+    public function getPrefixeContrat(): string { return $this->prefixeContrat; }
+    public function setPrefixeContrat(string $v): static { $this->prefixeContrat = $v; return $this; }
+
+    public function getProchainNumeroContrat(): int { return $this->prochainNumeroContrat; }
+    public function setProchainNumeroContrat(int $v): static { $this->prochainNumeroContrat = $v; return $this; }
 
     public function __toString(): string
     {

@@ -58,6 +58,12 @@ class Contrat implements SoftDeletableInterface
     #[Groups(['contrat:read', 'contrat:write'])]
     private ?Projet $projet = null;
 
+    /** Client du document (peut différer du contact du projet). */
+    #[ORM\ManyToOne(targetEntity: Contact::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['contrat:read', 'contrat:write'])]
+    private ?Contact $contact = null;
+
     #[ORM\Column(length: 20, enumType: TypeContrat::class)]
     #[Groups(['contrat:read', 'contrat:write'])]
     private TypeContrat $type = TypeContrat::DEVIS;
@@ -105,6 +111,9 @@ class Contrat implements SoftDeletableInterface
 
     public function getProjet(): ?Projet { return $this->projet; }
     public function setProjet(?Projet $projet): static { $this->projet = $projet; return $this; }
+
+    public function getContact(): ?Contact { return $this->contact; }
+    public function setContact(?Contact $contact): static { $this->contact = $contact; return $this; }
 
     public function getType(): TypeContrat { return $this->type; }
     public function setType(TypeContrat $type): static { $this->type = $type; return $this; }

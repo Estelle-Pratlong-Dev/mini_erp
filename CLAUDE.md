@@ -132,7 +132,16 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   Partagée entre `Contrat` et `Facture` (un seul parent renseigné par ligne).
   À ne pas confondre avec `PieceJointe` (fichiers joints) ni le PDF imprimable (généré à la volée).
 - Saisie dynamique des lignes via `CollectionType` + JS vanilla (prototype) dans
-  les formulaires contrat/facture — pas de build front.
+  les formulaires contrat/facture — pas de build front. Le formulaire contrat affiche par ligne
+  les **montants HT / TVA / TTC** + les **totaux**, recalculés en direct (JS).
+
+## Contrats (devis / contrats)
+- `Contrat` a son propre **`Contact` (client)**, qui peut **différer** de celui du projet ; pré-rempli
+  depuis le projet (contrôleur + `data-contact` sur les options projet côté JS), modifiable.
+- **Numérotation auto** : `App\Service\ContratNumeroGenerator` (verrou pessimiste sur `Societe`,
+  format `prefixeContrat` + n° sur 5 chiffres, ex. `DEV-00001`), attribuée à la création.
+  Préfixe et prochain n° **paramétrables dans Société** (admin), comme pour les factures.
+- Le PDF contrat utilise `contrat.contact` en priorité (repli sur le contact du projet).
 
 ## Facturation (Phase 3)
 - `Facture` rattachée à un `Projet` (jamais orpheline), `Contact` optionnel, `Contrat` d'origine opt.

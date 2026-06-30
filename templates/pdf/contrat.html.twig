@@ -46,7 +46,7 @@
     <div class="col-right">
         <div class="box" style="display:inline-block; text-align:left; min-width:45%;">
             <div class="muted" style="font-size:10px; text-transform:uppercase;">Client</div>
-            {% set client = contrat.projet.contact %}
+            {% set client = contrat.contact ?: contrat.projet.contact %}
             {% if client %}
                 <strong>{{ client }}</strong><br>
                 {{ client.adresse }}<br>

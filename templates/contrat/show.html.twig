@@ -27,6 +27,8 @@
         <dl class="row mb-0">
             <dt class="col-sm-3">Projet</dt>
             <dd class="col-sm-9"><a href="{{ path('app_projet_show', {id: contrat.projet.id}) }}">{{ contrat.projet.nom }}</a></dd>
+            <dt class="col-sm-3">Client</dt>
+            <dd class="col-sm-9">{{ contrat.contact ?: '—' }}</dd>
             <dt class="col-sm-3">Statut</dt>
             <dd class="col-sm-9"><span class="badge text-bg-{{ contrat.statut.couleur }}">{{ contrat.statut.libelle }}</span></dd>
             <dt class="col-sm-3">Émis le</dt>

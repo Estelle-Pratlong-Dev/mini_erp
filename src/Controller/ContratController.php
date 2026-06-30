@@ -11,6 +11,7 @@ use App\Form\ContratType;
 use App\Repository\ContratRepository;
 use App\Repository\ProduitRepository;
 use App\Repository\SocieteRepository;
+use App\Service\ContratNumeroGenerator;
 use App\Service\PdfGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,7 +35,7 @@ class ContratController extends AbstractController
 
     #[Route('/nouveau', name: 'app_contrat_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_CONTRATS_CREER')]
-    public function new(Request $request, EntityManagerInterface $em, ProduitRepository $produitRepository): Response
+    public function new(Request $request, EntityManagerInterface $em, ProduitRepository $produitRepository, ContratNumeroGenerator $numeroGenerator): Response
     {
         // Un contrat est toujours rattaché à un projet : il en faut au moins un.
         if ($em->getRepository(Projet::class)->count([]) === 0) {
@@ -58,6 +59,7 @@ class ContratController extends AbstractController
             $projet = $em->getRepository(Projet::class)->find($projetId);
             if ($projet) {
                 $contrat->setProjet($projet);
+                $contrat->setContact($projet->getContact()); // client par défaut = celui du projet
             }
         }
 
@@ -70,6 +72,9 @@ class ContratController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$contrat->getReference()) {
+                $contrat->setReference($numeroGenerator->generer());
+            }
             $em->persist($contrat);
             $em->flush();
             $this->addFlash('success', 'Document créé.');

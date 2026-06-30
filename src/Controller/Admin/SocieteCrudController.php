@@ -64,6 +64,8 @@ class SocieteCrudController extends AbstractCrudController
         yield TextField::new('devise', 'Devise')->hideOnIndex();
         yield TextField::new('prefixeFacture', 'Préfixe facture')->hideOnIndex();
         yield IntegerField::new('prochainNumeroFacture', 'Prochain n° facture')->hideOnIndex();
+        yield TextField::new('prefixeContrat', 'Préfixe devis/contrat')->hideOnIndex();
+        yield IntegerField::new('prochainNumeroContrat', 'Prochain n° devis/contrat')->hideOnIndex();
         yield TextareaField::new('conditionsPaiement', 'Conditions de paiement')->hideOnIndex();
         yield TextareaField::new('mentionsLegales', 'Mentions légales')->hideOnIndex();
     }
