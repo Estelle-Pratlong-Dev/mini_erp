@@ -7,6 +7,7 @@ use App\Entity\DelaiPaiement;
 use App\Entity\ModePaiement;
 use App\Entity\Module;
 use App\Entity\Permission;
+use App\Entity\UniteProduit;
 use App\Entity\Role;
 use App\Entity\Societe;
 use App\Entity\User;
@@ -80,6 +81,7 @@ class AppInstallCommand extends Command
         $this->seedCategoriesContact($io);
         $this->seedModesPaiement($io);
         $this->seedDelaisPaiement($io);
+        $this->seedUnites($io);
         $this->seedAdminUser($adminRole, (string) $input->getOption('email'), (string) $input->getOption('password'), $io);
 
         $this->em->flush();
@@ -197,6 +199,17 @@ class AppInstallCommand extends Command
             }
         }
         $io->writeln(' - Délais de paiement vérifiés.');
+    }
+
+    private function seedUnites(SymfonyStyle $io): void
+    {
+        $repo = $this->em->getRepository(UniteProduit::class);
+        foreach (['pièce', 'tige', 'botte', 'lot', 'kg', 'g', 'litre', 'mètre', 'heure'] as $nom) {
+            if (!$repo->findOneBy(['nom' => $nom])) {
+                $this->em->persist((new UniteProduit())->setNom($nom));
+            }
+        }
+        $io->writeln(' - Unités de produit vérifiées.');
     }
 
     private function seedAdminUser(Role $adminRole, string $email, string $password, SymfonyStyle $io): void

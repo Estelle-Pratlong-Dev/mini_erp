@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\Entity\Produit;
+use App\Entity\UniteProduit;
 use App\Enum\TypeProduit;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -29,9 +31,22 @@ class ProduitType extends AbstractType
                 'label' => 'Type',
                 'choice_label' => fn (TypeProduit $t) => $t->libelle(),
             ])
-            ->add('prixHt', MoneyType::class, ['label' => 'Prix HT', 'currency' => 'EUR'])
+            ->add('prixAchatHt', MoneyType::class, [
+                'label' => 'Prix d\'achat HT', 'currency' => 'EUR', 'required' => false,
+                'attr' => ['class' => 'prix-achat'],
+                'help' => 'Pour un produit composé, calculé automatiquement depuis les composants.',
+            ])
+            ->add('prixHt', MoneyType::class, ['label' => 'Prix de vente HT', 'currency' => 'EUR'])
             ->add('tauxTva', NumberType::class, ['label' => 'Taux TVA (%)'])
-            ->add('unite', TextType::class, ['label' => 'Unité', 'required' => false])
+            ->add('unite', EntityType::class, [
+                'class' => UniteProduit::class,
+                'label' => 'Unité',
+                'required' => false,
+                'placeholder' => '—',
+                'choice_label' => fn (UniteProduit $u) => $u->getNom(),
+                'query_builder' => fn ($repo) => $repo->createQueryBuilder('u')
+                    ->where('u.actif = true')->orderBy('u.nom', 'ASC'),
+            ])
             ->add('gereStock', CheckboxType::class, ['label' => 'Suivre le stock', 'required' => false])
             ->add('stockActuel', NumberType::class, ['label' => 'Stock actuel', 'scale' => 3])
             ->add('stockMin', NumberType::class, ['label' => 'Seuil d\'alerte', 'required' => false, 'scale' => 3])

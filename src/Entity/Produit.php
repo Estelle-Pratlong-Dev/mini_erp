@@ -67,6 +67,11 @@ class Produit implements SoftDeletableInterface
     private TypeProduit $type = TypeProduit::BIEN;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[Assert\PositiveOrZero]
+    #[Groups(['produit:read', 'produit:write'])]
+    private ?string $prixAchatHt = '0.00';
+
+    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     #[Assert\NotBlank]
     #[Assert\PositiveOrZero]
     #[Groups(['produit:read', 'produit:write'])]
@@ -76,9 +81,10 @@ class Produit implements SoftDeletableInterface
     #[Groups(['produit:read', 'produit:write'])]
     private ?string $tauxTva = '20.00';
 
-    #[ORM\Column(length: 20, nullable: true)]
+    #[ORM\ManyToOne(targetEntity: UniteProduit::class)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['produit:read', 'produit:write'])]
-    private ?string $unite = 'unité';
+    private ?UniteProduit $unite = null;
 
     /** Si vrai, le stock de ce produit est suivi. */
     #[ORM\Column]
@@ -129,14 +135,24 @@ class Produit implements SoftDeletableInterface
     public function getType(): TypeProduit { return $this->type; }
     public function setType(TypeProduit $type): static { $this->type = $type; return $this; }
 
+    public function getPrixAchatHt(): ?string { return $this->prixAchatHt; }
+    public function setPrixAchatHt(?string $prixAchatHt): static { $this->prixAchatHt = $prixAchatHt ?? '0'; return $this; }
+
     public function getPrixHt(): ?string { return $this->prixHt; }
     public function setPrixHt(string $prixHt): static { $this->prixHt = $prixHt; return $this; }
 
     public function getTauxTva(): ?string { return $this->tauxTva; }
     public function setTauxTva(string $tauxTva): static { $this->tauxTva = $tauxTva; return $this; }
 
-    public function getUnite(): ?string { return $this->unite; }
-    public function setUnite(?string $unite): static { $this->unite = $unite; return $this; }
+    public function getUnite(): ?UniteProduit { return $this->unite; }
+    public function setUnite(?UniteProduit $unite): static { $this->unite = $unite; return $this; }
+
+    /** Marge brute unitaire = prix de vente − prix d'achat (HT). */
+    #[Groups(['produit:read'])]
+    public function getMargeHt(): float
+    {
+        return round((float) $this->prixHt - (float) $this->prixAchatHt, 2);
+    }
 
     public function isGereStock(): bool { return $this->gereStock; }
     public function setGereStock(bool $gereStock): static { $this->gereStock = $gereStock; return $this; }

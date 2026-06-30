@@ -12,6 +12,7 @@
             <div class="col-md-5">{{ form_row(form.designation) }}</div>
             <div class="col-md-3">{{ form_row(form.type) }}</div>
             <div class="col-12">{{ form_row(form.description) }}</div>
+            <div class="col-md-3">{{ form_row(form.prixAchatHt) }}</div>
             <div class="col-md-3">{{ form_row(form.prixHt) }}</div>
             <div class="col-md-3">{{ form_row(form.tauxTva) }}</div>
             <div class="col-md-3">{{ form_row(form.unite) }}</div>
@@ -53,7 +54,28 @@
         (function () {
             const body = document.getElementById('composants-body');
             const addBtn = document.getElementById('btn-add-c');
+            const prixAchat = document.querySelector('.prix-achat');
             if (!body || !addBtn) return;
+
+            // Recalcule le prix d'achat d'un produit composé = somme(prix achat composant × qté).
+            function recompute() {
+                if (!prixAchat) return;
+                const rows = body.querySelectorAll('tr');
+                if (rows.length === 0) { prixAchat.readOnly = false; return; }
+                let total = 0;
+                rows.forEach((r) => {
+                    const sel = r.querySelector('.composant-article');
+                    const qte = r.querySelector('.composant-qte');
+                    if (!sel || !qte) return;
+                    const opt = sel.selectedOptions[0];
+                    const pa = opt ? parseFloat(opt.dataset.prixAchat) : NaN;
+                    const q = parseFloat((qte.value || '0').replace(',', '.'));
+                    if (!isNaN(pa) && !isNaN(q)) total += pa * q;
+                });
+                prixAchat.value = (Math.round(total * 100) / 100).toFixed(2);
+                prixAchat.readOnly = true;
+            }
+
             function wrap(html) {
                 const tpl = document.createElement('template');
                 tpl.innerHTML = html.trim();
@@ -74,11 +96,15 @@
                 let i = parseInt(body.dataset.index, 10);
                 body.appendChild(wrap(body.dataset.prototype.replace(/__name__/g, i)));
                 body.dataset.index = i + 1;
+                recompute();
             });
             body.addEventListener('click', function (e) {
                 const b = e.target.closest('.btn-remove-c');
-                if (b) { b.closest('tr').remove(); }
+                if (b) { b.closest('tr').remove(); recompute(); }
             });
+            body.addEventListener('input', recompute);
+            body.addEventListener('change', recompute);
+            recompute();
         })();
         </script>
     </div>

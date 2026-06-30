@@ -7,6 +7,7 @@ use App\Entity\Produit;
 use App\Enum\CodeModule;
 use App\Form\ProduitType;
 use App\Repository\ProduitRepository;
+use App\Service\NomenclatureService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,13 +30,16 @@ class ProduitController extends AbstractController
 
     #[Route('/nouveau', name: 'app_produit_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_CATALOGUE_CREER')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, NomenclatureService $nomenclature): Response
     {
         $produit = new Produit();
         $form = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($produit->isCompose()) {
+                $produit->setPrixAchatHt((string) $nomenclature->prixAchatCompose($produit));
+            }
             $em->persist($produit);
             $em->flush();
             $this->addFlash('success', 'Produit créé.');
@@ -51,12 +55,15 @@ class ProduitController extends AbstractController
 
     #[Route('/{id}/modifier', name: 'app_produit_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_CATALOGUE_MODIFIER')]
-    public function edit(Request $request, Produit $produit, EntityManagerInterface $em): Response
+    public function edit(Request $request, Produit $produit, EntityManagerInterface $em, NomenclatureService $nomenclature): Response
     {
         $form = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($produit->isCompose()) {
+                $produit->setPrixAchatHt((string) $nomenclature->prixAchatCompose($produit));
+            }
             $em->flush();
             $this->addFlash('success', 'Produit modifié.');
 

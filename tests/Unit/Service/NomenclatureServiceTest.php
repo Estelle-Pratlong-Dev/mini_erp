@@ -54,6 +54,18 @@ class NomenclatureServiceTest extends TestCase
         self::assertSame(7.2, $besoins[0]['quantite']); // 12 × 0.6
     }
 
+    public function testPrixAchatCompose(): void
+    {
+        $rose = $this->produit('ROSE')->setPrixAchatHt('0.60');
+        $lys = $this->produit('LYS')->setPrixAchatHt('0.90');
+        $compo = $this->produit('COMPO');
+        $this->composer($compo, $rose, '6');
+        $this->composer($compo, $lys, '4');
+
+        // 6 × 0.60 + 4 × 0.90 = 7.20
+        self::assertSame(7.20, (new NomenclatureService())->prixAchatCompose($compo));
+    }
+
     public function testProtectionAntiCycle(): void
     {
         $a = $this->produit('A');

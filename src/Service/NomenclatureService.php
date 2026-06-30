@@ -11,6 +11,23 @@ use App\Entity\Produit;
 class NomenclatureService
 {
     /**
+     * Prix d'achat d'un produit composé = somme (prix d'achat composant × quantité).
+     * Utilise le prix d'achat stocké de chaque composant (déjà calculé s'il est lui-même composé).
+     */
+    public function prixAchatCompose(Produit $produit): float
+    {
+        $total = 0.0;
+        foreach ($produit->getComposants() as $composant) {
+            $article = $composant->getComposant();
+            if ($article !== null) {
+                $total += (float) $article->getPrixAchatHt() * (float) $composant->getQuantite();
+            }
+        }
+
+        return round($total, 2);
+    }
+
+    /**
      * Besoins en articles de base pour fabriquer $quantite unités de $produit.
      *
      * @return list<array{produit: Produit, quantite: float}>

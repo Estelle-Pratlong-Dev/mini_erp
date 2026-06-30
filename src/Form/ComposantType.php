@@ -20,10 +20,12 @@ class ComposantType extends AbstractType
                 'label' => 'Article',
                 'placeholder' => '— Choisir un article —',
                 'choice_label' => fn (Produit $p) => (string) $p,
+                'choice_attr' => fn (Produit $p) => ['data-prix-achat' => $p->getPrixAchatHt()],
                 'query_builder' => fn ($repo) => $repo->createQueryBuilder('p')
                     ->where('p.actif = true')->orderBy('p.designation', 'ASC'),
+                'attr' => ['class' => 'composant-article'],
             ])
-            ->add('quantite', NumberType::class, ['label' => 'Quantité', 'scale' => 3]);
+            ->add('quantite', NumberType::class, ['label' => 'Quantité', 'scale' => 3, 'attr' => ['class' => 'composant-qte']]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

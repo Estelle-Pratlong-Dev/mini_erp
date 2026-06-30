@@ -160,7 +160,7 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
 ## Listes de référence personnalisables (admin)
 - Patron pour les listes éditables par le client : entité dédiée (soft delete + audit) +
   CRUD EasyAdmin (section « Listes de référence »). Exemples : **`CategorieContact`**,
-  **`ModePaiement`**, **`DelaiPaiement`** (avec un champ `jours`).
+  **`ModePaiement`**, **`DelaiPaiement`** (avec un champ `jours`), **`UniteProduit`**.
 - Sur les formulaires métier : `EntityType` (filtré `actif = true`) + possibilité d'**ajout rapide**
   (bouton « + » → endpoint JSON, ex. `app_contact_categorie_add`).
 - Convention : réserver ce patron aux **listes de classification** (catégories, types métier…) ;
@@ -186,6 +186,10 @@ Admin par défaut (créé par `app:install`) : `admin@mini-erp.local` / `admin`.
   composé en besoins d'articles de base (compositions imbriquées, protection anti-cycle).
 - La **décrémentation réelle du stock** des composants se fera dans le module **Stock / Vente**
   (utilisera `NomenclatureService`). Aujourd'hui : modèle + éclatement prêts, pas de mouvement de stock.
+- **Prix** : `Produit` a `prixAchatHt` (achat) et `prixHt` (vente) + `getMargeHt()`. Pour un produit
+  **composé**, le prix d'achat est **calculé** (`NomenclatureService::prixAchatCompose()` = Σ achat
+  composant × qté), recalculé au save (contrôleur) et en direct côté form (JS via `data-prix-achat`).
+- **Unité** = relation vers `UniteProduit` (liste personnalisable).
 
 ## État (phases livrées)
 - **Phase 0** : socle (auth, Société, Modules, RBAC, EasyAdmin admin).
